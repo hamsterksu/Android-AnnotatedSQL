@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="AnnotatedSQLApi">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <property name="version" value="1.0"/>
+    
+    <path id="AnnotatedSQLApi.classpath">
+        <pathelement location="bin"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    
+    <target name="build" depends="clean, init">
+        <buildnumber file="api-build.number"/>
+        <jar destfile="sqlannotation-api-${version}.${build.number}.jar" basedir="bin"></jar>
+	</target>
+</project>

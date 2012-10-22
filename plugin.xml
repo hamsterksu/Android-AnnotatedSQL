@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.7"?>
+<plugin>
+   <extension
+         point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
+         <java6processors enableDefault="true">
+                <java6processor class="com.annotatedsql.processor.sql.SQLProcessor"/>
+         </java6processors>
+   </extension>
+</plugin>
