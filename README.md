@@ -36,7 +36,38 @@ Create tabels and view for sport results application.
 `
 
 * Let's define interfaces inside schema class
-
+		
+        @Table(TeamTable.TABLE_NAME)
+      	public static interface TeamTable{
+          
+            String TABLE_NAME = "team_table";
+    
+            @PrimaryKey
+            @Column(type = Type.INTEGER)
+            String ID = "_id";
+            
+            @Column(type = Type.TEXT)
+            String TITLE = "title";
+            
+            @Column(type = Type.INTEGER)
+            String CHEMP_ID = "chemp_id";
+            
+            @Column(type = Type.INTEGER)
+            String IS_FAV = "is_fav";
+        }
+    
+        @Table(ChempTable.TABLE_NAME)
+        public static interface ChempTable{
+            
+    
+            @PrimaryKey
+            @Column(type = Type.INTEGER)
+            String ID = "_id";
+            
+            @Column(type = Type.TEXT)
+            String TITLE = "title";
+            
+        }
 
 		@Table(ResultsTable.TABLE_NAME)
 		@Index(name = "chemp_index", columns = ResultsTable.CHEMP_ID)
@@ -60,37 +91,7 @@ Create tabels and view for sport results application.
        		 ...............
     	}
     
-      @Table(TeamTable.TABLE_NAME)
-      public static interface TeamTable{
-          
-          String TABLE_NAME = "team_table";
-  
-          @PrimaryKey
-          @Column(type = Type.INTEGER)
-          String ID = "_id";
-          
-          @Column(type = Type.TEXT)
-          String TITLE = "title";
-          
-          @Column(type = Type.INTEGER)
-          String CHEMP_ID = "chemp_id";
-          
-          @Column(type = Type.INTEGER)
-          String IS_FAV = "is_fav";
-      }
-    
-      @Table(ChempTable.TABLE_NAME)
-      public static interface ChempTable{
-          
-  
-          @PrimaryKey
-          @Column(type = Type.INTEGER)
-          String ID = "_id";
-          
-          @Column(type = Type.TEXT)
-          String TITLE = "title";
-          
-      }
+      
 
 * Define simple view to join all necessary data for score screen
 
