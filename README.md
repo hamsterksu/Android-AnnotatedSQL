@@ -1,9 +1,13 @@
 Android-AnnotatedSQL
 ====================
 
-Android library for auto generating SQL schema
+Android library for auto generating SQL schema. 
 
-This project is a eclipse plugin to generate SQL schema by annotation for Android project
+This project is an eclipse plugin to generate SQL schema by annotations for Android project. It's annotation processor so it will not add some code to your final apk.
+It will work during compile process
+
+To use this library in project you should add annotations jar to project class path  and add plugin to eclipse. After that you should turn on annotation preprocessing for your project on the project properties screen and check plugin in factory path section.
+
 To build api jar only please use buil-api.xml
 
 We suppport the following annotations: **@Autoincrement**, **@Column**, **@From**, **@Index**, **@Join**, **@NotNull**, **@PrimaryKey**, **@Schema**, **@SimpleView**, **@Table**
