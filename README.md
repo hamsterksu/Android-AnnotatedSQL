@@ -38,59 +38,59 @@ Create tabels and view for sport results application.
 * Let's define interfaces inside schema class
 
 
-	@Table(ResultsTable.TABLE_NAME)
-	@Index(name = "chemp_index", columns = ResultsTable.CHEMP_ID)
-	@PrimaryKey(collumns = {ResultsTable.TEAM_ID, ResultsTable.CHEMP_ID})
-	public static interface ResultsTable{
+		@Table(ResultsTable.TABLE_NAME)
+		@Index(name = "chemp_index", columns = ResultsTable.CHEMP_ID)
+		@PrimaryKey(collumns = {ResultsTable.TEAM_ID, ResultsTable.CHEMP_ID})
+		public static interface ResultsTable{
     
-		@Column(type = Type.INTEGER)
-		String ID = "_id";
+			@Column(type = Type.INTEGER)
+			String ID = "_id";
         
-    	@NotNull
-		@Column(type = Type.INTEGER)
-		String TEAM_ID = "team_id";
+    		@NotNull
+			@Column(type = Type.INTEGER)
+			String TEAM_ID = "team_id";
         
-		@NotNull
-		@Column(type = Type.INTEGER)
-		String POINTS = "points";
+			@NotNull
+			@Column(type = Type.INTEGER)
+			String POINTS = "points";
         
-		@NotNull
-		@Column(type = Type.INTEGER)
-		String CHEMP_ID = "chemp_id";
-        ...............
-    }
+			@NotNull
+			@Column(type = Type.INTEGER)
+			String CHEMP_ID = "chemp_id";
+       		 ...............
+    	}
     
-    @Table(TeamTable.TABLE_NAME)
-	public static interface TeamTable{
-		
-		String TABLE_NAME = "team_table";
-
-		@PrimaryKey
-		@Column(type = Type.INTEGER)
-		String ID = "_id";
-		
-		@Column(type = Type.TEXT)
-		String TITLE = "title";
-		
-		@Column(type = Type.INTEGER)
-		String CHEMP_ID = "chemp_id";
-		
-		@Column(type = Type.INTEGER)
-		String IS_FAV = "is_fav";
-	}
+      @Table(TeamTable.TABLE_NAME)
+      public static interface TeamTable{
+          
+          String TABLE_NAME = "team_table";
+  
+          @PrimaryKey
+          @Column(type = Type.INTEGER)
+          String ID = "_id";
+          
+          @Column(type = Type.TEXT)
+          String TITLE = "title";
+          
+          @Column(type = Type.INTEGER)
+          String CHEMP_ID = "chemp_id";
+          
+          @Column(type = Type.INTEGER)
+          String IS_FAV = "is_fav";
+      }
     
-    @Table(ChempTable.TABLE_NAME)
-	public static interface ChempTable{
-		
-
-		@PrimaryKey
-		@Column(type = Type.INTEGER)
-		String ID = "_id";
-		
-		@Column(type = Type.TEXT)
-		String TITLE = "title";
-        
-    }
+      @Table(ChempTable.TABLE_NAME)
+      public static interface ChempTable{
+          
+  
+          @PrimaryKey
+          @Column(type = Type.INTEGER)
+          String ID = "_id";
+          
+          @Column(type = Type.TEXT)
+          String TITLE = "title";
+          
+      }
 
 * Define simple view to join all necessary data for score screen
 
