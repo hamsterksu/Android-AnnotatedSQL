@@ -36,7 +36,9 @@ Create tabels and view for sport results application.
 `
 
 * Let's define interfaces inside schema class
-		
+
+Team table definition		
+
         @Table(TeamTable.TABLE_NAME)
       	public static interface TeamTable{
           
@@ -55,7 +57,9 @@ Create tabels and view for sport results application.
             @Column(type = Type.INTEGER)
             String IS_FAV = "is_fav";
         }
-    
+
+Chempionat table definition
+
         @Table(ChempTable.TABLE_NAME)
         public static interface ChempTable{
             
@@ -68,6 +72,8 @@ Create tabels and view for sport results application.
             String TITLE = "title";
             
         }
+
+Team results table
 
 		@Table(ResultsTable.TABLE_NAME)
 		@Index(name = "chemp_index", columns = ResultsTable.CHEMP_ID)
