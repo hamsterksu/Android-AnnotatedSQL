@@ -10,6 +10,10 @@ To use this library in project you should add annotations jar to project class p
 
 To build api jar only please use buil-api.xml
 
+To use with ant you shoudl add plugin to classpath only:
+
+`ant clean release -cp ../com.annotatedsql.AnnotatedSQL_1.0.12.jar`
+
 We suppport the following annotations: **@Autoincrement**, **@Column**, **@From**, **@Index**, **@Join**, **@NotNull**, **@PrimaryKey**, **@Schema**, **@SimpleView**, **@Table**
 
 ###Top level annotation:
