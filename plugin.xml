@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
          <java6processors enableDefault="true">
-                <java6processor class="com.annotatedsql.processor.sql.SQLProcessor"/>
+                <java6processor class="com.annotatedsql.processor.provider.ProviderProcessor"/>
          </java6processors>
    </extension>
 </plugin>
