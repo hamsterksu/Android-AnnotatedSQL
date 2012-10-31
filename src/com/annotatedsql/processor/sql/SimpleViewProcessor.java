@@ -7,6 +7,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 
 import com.annotatedsql.AnnotationParsingException;
+import com.annotatedsql.annotation.sql.Columns;
 import com.annotatedsql.annotation.sql.From;
 import com.annotatedsql.annotation.sql.Join;
 import com.annotatedsql.annotation.sql.SimpleView;
@@ -36,19 +37,44 @@ public class SimpleViewProcessor {
 					throw new AnnotationParsingException("Dublicate @From annotation", f);
 				}
 				from = tmpFrom;
+				Columns columns = f.getAnnotation(Columns.class);
+				String[] selectedColumns = columns != null ? columns.value() : null;
 				
 				String asName = (String)((VariableElement)f).getConstantValue();
-				addTableColumn(select, tableColumns.get(from.value()), asName, true);		
+				try{
+					addTableColumn(select, tableColumns.get(from.value()), selectedColumns, asName, true);
+				}catch (RuntimeException e) {
+					throw new AnnotationParsingException(e.getMessage(), f);
+				}
 				sql.insert(pos, " FROM " + from.value() + " AS " + asName);
 			}else{
 				Join join = f.getAnnotation(Join.class);
 				if(join != null){
+					Columns columns = f.getAnnotation(Columns.class);
+					String[] selectedColumns = columns != null ? columns.value() : null;
 					String asName = (String)((VariableElement)f).getConstantValue();
-					sql.append(" JOIN ").append(join.srcTable()).append(" AS ").append(asName)
+					switch (join.type()) {
+						case INNER:
+							sql.append(" JOIN ");
+							break;
+						case LEFT:
+							sql.append(" LEFT OUTER JOIN ");
+							break;
+						case RIGHT:
+							sql.append(" RIGHT OUTER JOIN ");
+							break;
+						case CROSS:
+							sql.append(" CROSS JOIN ");
+							break;
+					}
+					sql.append(join.srcTable()).append(" AS ").append(asName)
 					.append(" ON ").append(asName).append('.').append(join.srcColumn())
 					.append(" = ").append(join.destTable()).append('.').append(join.destColumn());
-					
-					addTableColumn(select, tableColumns.get(join.srcTable()), asName, false);
+					try{
+						addTableColumn(select, tableColumns.get(join.srcTable()), selectedColumns, asName, false);
+					}catch (RuntimeException e) {
+						throw new AnnotationParsingException(e.getMessage(), f);
+					}
 				}
 			}
 		}
@@ -61,15 +87,30 @@ public class SimpleViewProcessor {
 		return sql.toString();
 	}
 	
-	private static void addTableColumn(StringBuilder select, List<String> coluumns, String asName, boolean ignoreId){
+	private static void addTableColumn(StringBuilder select, List<String> coluumns, String[] selectedColumns, String asName, boolean ignoreId){
 		if(coluumns == null || coluumns.isEmpty())
 			return;
-		for(String c : coluumns){
-			if(ignoreId && "_id".equals(c)){
-				select.append(", ").append(asName).append('.').append(c);
-			}else{
-				select.append(", ").append(asName).append('.').append(c).append(" as ").append(asName).append('_').append(c);
+		if(selectedColumns != null && selectedColumns.length != 0){
+			for(String selCol : selectedColumns){
+				if(!coluumns.contains(selCol)){
+					throw new RuntimeException("Table doesn't have column with name '" + selCol + "'");
+				}
+				addColumn(select, asName, ignoreId, selCol);
+			}
+		}else{
+			for(String c : coluumns){
+				addColumn(select, asName, ignoreId, c);
 			}
 		}
 	}
+
+	private static void addColumn(StringBuilder select, String asName, boolean ignoreId, String c) {
+		if(ignoreId && "_id".equals(c)){
+			select.append(", ").append(asName).append('.').append(c);
+		}else{
+			select.append(", ").append(asName).append('.').append(c).append(" as ").append(asName).append('_').append(c);
+		}
+	}
+	
+	
 }

@@ -10,4 +10,10 @@ public @interface Join {
 	
 	String destTable();
 	String destColumn();
+	
+	Type type() default Type.INNER;
+	
+	public static enum Type{
+		INNER, LEFT, RIGHT, CROSS
+	}
 }
