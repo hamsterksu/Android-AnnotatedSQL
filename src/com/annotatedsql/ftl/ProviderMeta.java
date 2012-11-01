@@ -11,9 +11,10 @@ public class ProviderMeta {
 	private String pkgName;
 	private String schemaClassName;
 	private String authority;
+	private String openHelperClass;
+	
 	private List<UriMeta> entities = new ArrayList<UriMeta>();
 	private List<String> imports = new ArrayList<String>();
-	private String openHelperClass;
 	
 	public ProviderMeta(String className){
 		this.className = className;

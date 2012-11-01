@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 public @interface URI {
 	
 	String column() default "_id";
-	Type type() default Type.DIR;
+	Type type() default Type.DIR_AND_ITEM;
 	String altNotify() default "";
 	boolean onlyQuery() default false;
 	

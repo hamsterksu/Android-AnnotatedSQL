@@ -27,6 +27,8 @@ public class ${className} extends ContentProvider{
 
 	public static final String AUTHORITY = "${authority}";
 	private static final String FRAGMENT_NO_NOTIFY = "no-notify";
+	private static final String QUERY_LIMIT = "limit";
+	
 	private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
 	private final static int MATCH_TYPE_ITEM = 0x0001;
@@ -95,7 +97,7 @@ public class ${className} extends ContentProvider{
 		}
 		Cursor c = query.query(dbHelper.getReadableDatabase(),
         		projection, selection, selectionArgs,
-        		groupBy, null, sortOrder, null);
+        		groupBy, null, sortOrder, uri.getQueryParameter(QUERY_LIMIT));
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 		
 		return c;
@@ -108,9 +110,7 @@ public class ${className} extends ContentProvider{
 		
 		switch(matcher.match(uri)){
 			<#list entities as e>
-			<#if e.item>
-			<#elseif e.onlyQuery>
-			<#else>
+			<#if !e.item && !e.onlyQuery>
 			case MATCH_${getMathcName(e.path)}:{
 				table = ${e.tableLink};
 				<#if (e.altNotify?length > 0)>
@@ -123,7 +123,21 @@ public class ${className} extends ContentProvider{
 			default:
 				throw new IllegalArgumentException("Unsupported uri " + uri);
 		}
+		<#list entities as e>
+			<#if !e.item && !e.onlyQuery && e.triggered && e.trigger.insert && e.trigger.before>
+		if(${e.tableLink}.equals(table)){
+			on${e.trigger.methodName?cap_first}Inserted(values);
+		}			
+			</#if>
+		</#list>
 		dbHelper.getWritableDatabase().insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		<#list entities as e>
+			<#if !e.item && !e.onlyQuery && e.triggered && e.trigger.insert && e.trigger.after>
+		if(${e.tableLink}.equals(table)){
+			on${e.trigger.methodName?cap_first}Inserted(values);
+		}			
+			</#if>
+		</#list>
 		if(!ignoreNotify(uri)){
 			contentResolver.notifyChange(uri, null);
 			if(alternativeNotify != null){
@@ -159,7 +173,21 @@ public class ${className} extends ContentProvider{
 			default:
 				throw new IllegalArgumentException("Unsupported uri " + uri);
 		}
+		<#list entities as e>
+			<#if !e.onlyQuery && e.triggered && e.trigger.update && e.trigger.before>
+		if(${e.tableLink}.equals(table)){
+			on${e.trigger.methodName?cap_first}Updated(uri, values, selection, selectionArgs);
+		}			
+			</#if>
+		</#list>
 		int count = dbHelper.getWritableDatabase().update(table, values, processedSelection, selectionArgs);
+		<#list entities as e>
+			<#if !e.onlyQuery && e.triggered && e.trigger.update && e.trigger.after>
+		if(${e.tableLink}.equals(table)){
+			on${e.trigger.methodName?cap_first}Updated(uri, values, selection, selectionArgs);
+		}			
+			</#if>
+		</#list>
 		if(!ignoreNotify(uri)){
 			contentResolver.notifyChange(uri, null);
 			if(alternativeNotify != null){
@@ -196,7 +224,21 @@ public class ${className} extends ContentProvider{
 			default:
 				throw new IllegalArgumentException("Unsupported uri " + uri);
 		}
+		<#list entities as e>
+			<#if !e.onlyQuery && e.triggered && e.trigger.delete && e.trigger.before>
+		if(${e.tableLink}.equals(table)){
+			on${e.trigger.methodName?cap_first}Deleted(uri, selection, selectionArgs);
+		}			
+			</#if>
+		</#list>
 		int count = dbHelper.getWritableDatabase().delete(table, processedSelection, selectionArgs);
+		<#list entities as e>
+			<#if !e.onlyQuery && e.triggered && e.trigger.delete && e.trigger.after>
+		if(${e.tableLink}.equals(table)){
+			on${e.trigger.methodName?cap_first}Deleted(uri, selection, selectionArgs);
+		}			
+			</#if>
+		</#list>
 		if(!ignoreNotify(uri)){
 			contentResolver.notifyChange(uri, null);
 			if(alternativeNotify != null){
@@ -205,7 +247,29 @@ public class ${className} extends ContentProvider{
 		}
 		return count;
 	}
-	
+	<#list entities as e>
+		<#if e.triggered>
+			<#if e.trigger.insert>
+			
+	protected void on${e.trigger.methodName?cap_first}Inserted(ContentValues values){
+		
+	}
+			</#if>			
+			<#if e.trigger.delete>
+			
+	protected void on${e.trigger.methodName?cap_first}Deleted(Uri uri, String selection, String[] selectionArgs){
+		
+	}
+			</#if>
+			<#if e.trigger.update>
+			
+	protected void on${e.trigger.methodName?cap_first}Updated(Uri uri, ContentValues values, String selection, String[] selectionArg){
+		
+	}
+			</#if>
+		</#if>
+	</#list>
+		
 	private static boolean ignoreNotify(Uri uri){
 		return FRAGMENT_NO_NOTIFY.equals(uri.getFragment());
 	}
@@ -235,6 +299,12 @@ public class ${className} extends ContentProvider{
 		if(TextUtils.isEmpty(path))
 			return null;
 		return BASE_URI.buildUpon().appendPath(path).appendPath(id).build(); 
+	}
+	
+	public static Uri getContentWithLimitUri(String path, int limit){
+		if(TextUtils.isEmpty(path))
+			return null;
+		return BASE_URI.buildUpon().appendPath(path).appendQueryParameter(QUERY_LIMIT, String.valueOf(limit)).build(); 
 	}
 	
 	public static Uri getNoNotifyContentUri(String path){

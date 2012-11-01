@@ -10,8 +10,9 @@ public class UriMeta {
 	private final String selectColumn;
 	private final String altNotify;
 	private final boolean onlyQuery;
+	private final TriggerMeta trigger;
 	
-	public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String altNotify, boolean onlyQuery) {
+	public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String altNotify, boolean onlyQuery, TriggerMeta trigger) {
 		super();
 		this.path = path;
 		this.code = code;
@@ -20,6 +21,7 @@ public class UriMeta {
 		this.selectColumn = selectColumn;
 		this.altNotify = altNotify;
 		this.onlyQuery = onlyQuery;
+		this.trigger = trigger;
 		codeHex = "0x" + Integer.toHexString(code);
 	}
 	
@@ -53,5 +55,13 @@ public class UriMeta {
 	
 	public boolean isOnlyQuery() {
 		return onlyQuery;
+	}
+
+	public TriggerMeta getTrigger() {
+		return trigger;
+	}
+	
+	public boolean isTriggered() {
+		return trigger != null;
 	}
 }

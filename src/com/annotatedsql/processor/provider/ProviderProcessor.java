@@ -19,11 +19,14 @@ import javax.tools.JavaFileObject;
 
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.provider.Provider;
+import com.annotatedsql.annotation.provider.Trigger;
 import com.annotatedsql.annotation.provider.URI;
+import com.annotatedsql.annotation.provider.Trigger.When;
 import com.annotatedsql.annotation.provider.URI.Type;
 import com.annotatedsql.annotation.sql.SimpleView;
 import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.ProviderMeta;
+import com.annotatedsql.ftl.TriggerMeta;
 import com.annotatedsql.ftl.UriMeta;
 import com.annotatedsql.processor.ProcessorLogger;
 import com.annotatedsql.util.TextUtils;
@@ -115,19 +118,29 @@ public class ProviderProcessor extends AbstractProcessor{
 			if(uri == null){
 				continue;
 			}
+			Trigger trigger = e.getAnnotation(Trigger.class);
+			TriggerMeta triggerMeta = null;
+			if(trigger != null){
+				String triggerMethod = trigger.name().trim();
+				if(TextUtils.isEmpty(triggerMethod)){
+					throw new AnnotationParsingException("Trigger method name is empty", e);
+				}
+				triggerMeta = new TriggerMeta(triggerMethod, trigger.type(), trigger.when() ==  When.BEFORE);
+			}
+			
 			String pathValue = (String)((VariableElement)e).getConstantValue();
 			String path = parentName + "." + e.getSimpleName().toString();
 			if(uri.type() == Type.DIR_AND_ITEM){
-				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery()));
-				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery()));
+				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggerMeta));
+				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), null));
 			}else{
-				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery()));
+				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggerMeta));
 			}
 		}
 		return uris;
 	}
 	
-	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery){
+	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery, TriggerMeta trigger){
 		if(type == Type.ITEM && !pathValue.endsWith("#")){
 			if(!pathValue.endsWith("/")){
 				path += " + \"/#\"";
@@ -139,7 +152,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		int code  = elementCode | typeMask;
 		elementCode += 0x0010;
 		logger.i("add: " + code + "; path = " + path + "; from = " + from);
-		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery);
+		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery, trigger);
 	}
 	
 	private String findName(Element element){
