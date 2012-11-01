@@ -101,16 +101,16 @@ public class ProviderProcessor extends AbstractProcessor{
 			String pathValue = (String)((VariableElement)e).getConstantValue();
 			String path = parentName + "." + e.getSimpleName().toString();
 			if(uri.type() == Type.DIR_AND_ITEM){
-				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from));
-				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from));
+				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery()));
+				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery()));
 			}else{
-				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from));
+				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery()));
 			}
 		}
 		return uris;
 	}
 	
-	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from){
+	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery){
 		if(type == Type.ITEM && !pathValue.endsWith("#")){
 			if(!pathValue.endsWith("/")){
 				path += " + \"/#\"";
@@ -122,7 +122,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		int code  = elementCode | typeMask;
 		elementCode += 0x0010;
 		logger.i("add: " + code + "; path = " + path + "; from = " + from);
-		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from);
+		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery);
 	}
 	
 	private String findName(Element element){
