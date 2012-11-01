@@ -18,23 +18,22 @@ import javax.lang.model.element.VariableElement;
 import javax.tools.JavaFileObject;
 
 import com.annotatedsql.AnnotationParsingException;
+import com.annotatedsql.annotation.provider.Provider;
 import com.annotatedsql.annotation.provider.URI;
 import com.annotatedsql.annotation.provider.URI.Type;
 import com.annotatedsql.annotation.sql.SimpleView;
 import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.ProviderMeta;
-import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.UriMeta;
 import com.annotatedsql.processor.ProcessorLogger;
+import com.annotatedsql.util.TextUtils;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-@SupportedAnnotationTypes({ "com.annotatedsql.annotation.sql.Table", 
-							"com.annotatedsql.annotation.provider.Provider",
-							"com.annotatedsql.annotation.provider.URI"})
+@SupportedAnnotationTypes({"com.annotatedsql.annotation.provider.Provider"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class ProviderProcessor extends AbstractProcessor{
 
@@ -62,28 +61,45 @@ public class ProviderProcessor extends AbstractProcessor{
 	}
 	
 	private boolean processSchema(RoundEnvironment roundEnv) {
-		ProviderMeta provider = new ProviderMeta();
+		ProviderMeta provider;
 		
-		String pkgName = null;
-		
-		for (Element element : roundEnv.getElementsAnnotatedWith(URI.class)) {
-			logger.i("el = " + element.getSimpleName());
+		Set<? extends Element> providerElements = roundEnv.getElementsAnnotatedWith(Provider.class);
+		if(providerElements != null && providerElements.size() != 0){
+			if(providerElements.size() != 1){
+				for(Element e : providerElements){
+					logger.e("Please use one provider file", e);
+				}
+				return false;
+			}else{
+				Element e = providerElements.iterator().next();
+				Provider providerElement = e.getAnnotation(Provider.class);
+				if(TextUtils.isEmpty(providerElement.value())){
+					logger.e("Provider name can't be empty", e);
+					return false;
+				}
+				provider = new ProviderMeta(providerElement.value());
+				PackageElement pkg = (PackageElement)e.getEnclosingElement();
+				provider.setPkgName(pkg.getQualifiedName().toString());
+				provider.setSchemaClassName(providerElement.schemaClass());
+				provider.setAuthority(providerElement.authority());
+			}
+		}else{
+			return false;
 		}
+		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
 			provider.addImport(((TypeElement)element).getQualifiedName().toString());
 			provider.addUris(processTable(element));
 		}
+		
 		for (Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)) {
 			provider.addImport(((TypeElement)element).getQualifiedName().toString());
 			provider.addUris(processTable(element));
 		}
-		provider.setPkgName("com.test.sql");
-		provider.setClassName("TestProvider");
-		provider.setSchemaClassName("SqlSchema");
-		provider.setAuthority("com.test.AUTHORITY");
 		processTemplateForModel(provider);
 		return true;
 	}
+	
 
 	private List<UriMeta> processTable(Element element) {
 		String parentName = element.getSimpleName().toString();

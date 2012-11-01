@@ -12,7 +12,7 @@ public class ProviderMeta {
 	private List<UriMeta> entities = new ArrayList<UriMeta>();
 	private List<String> imports = new ArrayList<String>();
 	
-	public void setClassName(String className) {
+	public ProviderMeta(String className){
 		this.className = className;
 	}
 	
