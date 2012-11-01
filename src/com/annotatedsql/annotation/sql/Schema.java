@@ -6,6 +6,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Schema{
 
-	String value();
+	String className();
+	String dbName();
+	int dbVersion();
 	
 }

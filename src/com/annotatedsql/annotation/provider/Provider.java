@@ -2,7 +2,9 @@ package com.annotatedsql.annotation.provider;
 
 public @interface Provider {
 
-	String value();
+	String name();
 	String schemaClass();
 	String authority();
+	String openHelperClass() default "";
+	
 }

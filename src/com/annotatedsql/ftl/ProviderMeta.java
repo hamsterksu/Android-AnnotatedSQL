@@ -3,6 +3,8 @@ package com.annotatedsql.ftl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.annotatedsql.util.TextUtils;
+
 public class ProviderMeta {
 
 	private String className;
@@ -11,6 +13,7 @@ public class ProviderMeta {
 	private String authority;
 	private List<UriMeta> entities = new ArrayList<UriMeta>();
 	private List<String> imports = new ArrayList<String>();
+	private String openHelperClass;
 	
 	public ProviderMeta(String className){
 		this.className = className;
@@ -58,5 +61,17 @@ public class ProviderMeta {
 	
 	public void addImport(String importStr){
 		imports.add(importStr);
+	}
+	
+	public void setOpenHelperClass(String openHelperClass) {
+		this.openHelperClass = openHelperClass;
+	}
+	
+	public String getOpenHelperClass() {
+		return openHelperClass;
+	}
+	
+	public boolean isGenerateHelper(){
+		return TextUtils.isEmpty(openHelperClass);
 	}
 }

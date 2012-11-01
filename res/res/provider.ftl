@@ -51,7 +51,11 @@ public class ${className} extends ContentProvider{
 	@Override
 	public boolean onCreate() {
 		final Context context = getContext();
+		<#if generateHelper>
 		dbHelper = new AnnotationSql(context);
+		<#else>
+		dbHelper = new ${openHelperClass}(context);
+		</#if>
 		contentResolver = context.getContentResolver();
 		return true;
 	}
@@ -192,7 +196,7 @@ public class ${className} extends ContentProvider{
 			default:
 				throw new IllegalArgumentException("Unsupported uri " + uri);
 		}
-		int count = dbHelper.getWritableDatabase().delete(table, processedSelection, selectionArgs)
+		int count = dbHelper.getWritableDatabase().delete(table, processedSelection, selectionArgs);
 		if(!ignoreNotify(uri)){
 			contentResolver.notifyChange(uri, null);
 			if(alternativeNotify != null){
@@ -244,11 +248,12 @@ public class ${className} extends ContentProvider{
 			return null;
 		return BASE_URI.buildUpon().appendPath(path).appendPath(String.valueOf(id)).fragment(FRAGMENT_NO_NOTIFY).build(); 
 	}
-	   
+	
+	<#if generateHelper>   
 	private class AnnotationSql extends SQLiteOpenHelper {
 
 		public AnnotationSql(Context context) {
-			super(context, FStore.DB_NAME, null, FStore.DB_VERSION);
+			super(context, ${schemaClassName}.DB_NAME, null, ${schemaClassName}.DB_VERSION);
 		}
 
 		@Override
@@ -263,5 +268,6 @@ public class ${className} extends ContentProvider{
 		}
 
 	}
+	</#if>
 
 }

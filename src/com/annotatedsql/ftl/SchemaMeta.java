@@ -8,6 +8,9 @@ public class SchemaMeta {
 	private final String className;
 	private String pkgName;
 	
+	private String dbName;
+	private int dbVersion;
+	
 	private final List<TableMeta> tables = new ArrayList<TableMeta>();
 	private final List<IndexMeta> indexes = new ArrayList<IndexMeta>();
 	private final List<ViewMeta> views = new ArrayList<ViewMeta>();
@@ -55,5 +58,21 @@ public class SchemaMeta {
 	
 	public List<ViewMeta> getViews() {
 		return views;
+	}
+	
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}
+	
+	public String getDbName() {
+		return dbName;
+	}
+	
+	public void setDbVersion(int dbVersion) {
+		this.dbVersion = dbVersion;
+	}
+	
+	public int getDbVersion() {
+		return dbVersion;
 	}
 }

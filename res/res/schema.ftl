@@ -8,7 +8,10 @@ package ${pkgName};
 import android.database.sqlite.SQLiteDatabase;
 
 public class ${className}{
-	 
+
+	public static final String DB_NAME = "${dbName}";
+	public static final int DB_VERSION = ${dbVersion};
+		 
 	 <#list tables as table>
 	 private static final String SQL_CREATE_${table.tableName?upper_case} = "${table.sql}";
 	 

@@ -73,14 +73,15 @@ public class ProviderProcessor extends AbstractProcessor{
 			}else{
 				Element e = providerElements.iterator().next();
 				Provider providerElement = e.getAnnotation(Provider.class);
-				if(TextUtils.isEmpty(providerElement.value())){
+				if(TextUtils.isEmpty(providerElement.name())){
 					logger.e("Provider name can't be empty", e);
 					return false;
 				}
-				provider = new ProviderMeta(providerElement.value());
+				provider = new ProviderMeta(providerElement.name());
 				PackageElement pkg = (PackageElement)e.getEnclosingElement();
 				provider.setPkgName(pkg.getQualifiedName().toString());
 				provider.setSchemaClassName(providerElement.schemaClass());
+				provider.setOpenHelperClass(providerElement.openHelperClass());
 				provider.setAuthority(providerElement.authority());
 			}
 		}else{

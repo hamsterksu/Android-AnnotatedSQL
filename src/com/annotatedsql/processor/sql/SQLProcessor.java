@@ -61,8 +61,7 @@ public class SQLProcessor extends AbstractProcessor {
 
 	private boolean processTable(RoundEnvironment roundEnv) {
 		logger.i("SQLProcessor processTable");
-		
-		String pkgName = null;
+
 		SchemaMeta schema;
 		Set<? extends Element> schemaElements = roundEnv.getElementsAnnotatedWith(Schema.class);
 		if(schemaElements != null && schemaElements.size() != 0){
@@ -74,27 +73,27 @@ public class SQLProcessor extends AbstractProcessor {
 			}else{
 				Element e = schemaElements.iterator().next();
 				Schema schemaElement = e.getAnnotation(Schema.class);
-				if(TextUtils.isEmpty(schemaElement.value())){
+				if(TextUtils.isEmpty(schemaElement.className())){
 					logger.e("Schema name can't be empty", e);
 					return false;
 				}
-				schema = new SchemaMeta(schemaElement.value());
+				schema = new SchemaMeta(schemaElement.className());
+				schema.setDbName(schemaElement.dbName());
+				schema.setDbVersion(schemaElement.dbVersion());
+				
 				PackageElement pkg = (PackageElement)e.getEnclosingElement();
-				pkgName = pkg.getQualifiedName().toString();
+				String pkgName = pkg.getQualifiedName().toString();
+				logger.i("SQLProcessor pkgName found: " + pkgName);
+				schema.setPkgName(pkgName);
+				
 			}
 		}else{
-			 schema = new SchemaMeta("SQLSchema");
+			 return false;
 		}
 		
 		
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
-			
-			if(pkgName == null){
-				PackageElement pkg = (PackageElement)element.getEnclosingElement();
-				pkgName = pkg.getQualifiedName().toString();
-				logger.i("SQLProcessor pkgName found: " + pkgName);
-			}
 			
 			logger.i("SQLProcessor table found: " + element.getSimpleName());
 			Table table = element.getAnnotation(Table.class);
@@ -104,11 +103,6 @@ public class SQLProcessor extends AbstractProcessor {
 		}
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Index.class)) {
-			if(pkgName == null){
-				PackageElement pkg = (PackageElement)element.getEnclosingElement();
-				pkgName = pkg.getQualifiedName().toString();
-				logger.i("SQLProcessor pkgName found: " + pkgName);
-			}
 			
 			logger.i("SQLProcessor index found: " + element.getSimpleName());
 			Index index = element.getAnnotation(Index.class);
@@ -121,10 +115,9 @@ public class SQLProcessor extends AbstractProcessor {
 			String sql = SimpleViewProcessor.create(element, tableColumns);
 			schema.addView(new ViewMeta(view.value(), sql));
 		}
-		if(pkgName == null || schema.isEmpty()){
+		if(schema.isEmpty()){
 			return false;
 		}
-		schema.setPkgName(pkgName);
 		processTemplateForModel(schema);
 		return true;
 	}
