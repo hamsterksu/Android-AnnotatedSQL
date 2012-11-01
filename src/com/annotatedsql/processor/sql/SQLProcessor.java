@@ -35,11 +35,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-@SupportedAnnotationTypes({ "com.annotatedsql.annotation.sql.Table", 
-							"com.annotatedsql.annotation.sql.SimpleView",
-							"com.annotatedsql.annotation.sql.Index", 
-							"com.annotatedsql.annotation.sql.PrimaryKey",
-							"com.annotatedsql.annotation.sql.Schema"})
+@SupportedAnnotationTypes({"com.annotatedsql.annotation.sql.Schema"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class SQLProcessor extends AbstractProcessor {
 

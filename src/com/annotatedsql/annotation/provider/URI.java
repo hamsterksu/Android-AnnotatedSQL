@@ -5,5 +5,11 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 public @interface URI {
-	String column() default "_id"; 
+	
+	String column() default "_id";
+	Type type() default Type.DIR;
+	String altNotify() default "";
+	boolean onlyQuery() default false;
+	
+	public static enum Type{DIR, ITEM, DIR_AND_ITEM}
 }
