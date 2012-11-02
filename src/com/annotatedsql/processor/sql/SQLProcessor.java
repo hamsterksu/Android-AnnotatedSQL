@@ -54,7 +54,7 @@ public class SQLProcessor extends AbstractProcessor {
 		try{
 			return processTable(roundEnv);
 		}catch (AnnotationParsingException e) {
-			logger.e(e.getMessage(), e.getElement());
+			logger.e(e.getMessage(), e.getElements());
 			return false;
 		}
 	}

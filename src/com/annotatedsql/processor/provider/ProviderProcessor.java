@@ -20,8 +20,9 @@ import javax.tools.JavaFileObject;
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.provider.Provider;
 import com.annotatedsql.annotation.provider.Trigger;
-import com.annotatedsql.annotation.provider.URI;
 import com.annotatedsql.annotation.provider.Trigger.When;
+import com.annotatedsql.annotation.provider.Triggers;
+import com.annotatedsql.annotation.provider.URI;
 import com.annotatedsql.annotation.provider.URI.Type;
 import com.annotatedsql.annotation.sql.SimpleView;
 import com.annotatedsql.annotation.sql.Table;
@@ -42,7 +43,7 @@ public class ProviderProcessor extends AbstractProcessor{
 
 	private final static int MATCH_TYPE_ITEM = 0x0001;
 	private final static int MATCH_TYPE_DIR = 0x0002;
-	private final static int MATCH_TYPE_MASK = 0x000f;
+	//private final static int MATCH_TYPE_MASK = 0x000f;
 	
 	private int elementCode = 0x1000;
 	
@@ -58,7 +59,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		try{
 			return processSchema(roundEnv);
 		}catch (AnnotationParsingException e) {
-			logger.e(e.getMessage(), e.getElement());
+			logger.e(e.getMessage(), e.getElements());
 			return false;
 		}
 	}
@@ -118,29 +119,43 @@ public class ProviderProcessor extends AbstractProcessor{
 			if(uri == null){
 				continue;
 			}
-			Trigger trigger = e.getAnnotation(Trigger.class);
-			TriggerMeta triggerMeta = null;
-			if(trigger != null){
-				String triggerMethod = trigger.name().trim();
-				if(TextUtils.isEmpty(triggerMethod)){
-					throw new AnnotationParsingException("Trigger method name is empty", e);
-				}
-				triggerMeta = new TriggerMeta(triggerMethod, trigger.type(), trigger.when() ==  When.BEFORE);
-			}
+			
+			List<TriggerMeta> triggersList = new ArrayList<TriggerMeta>();
+			validateTrigger(e, triggersList, e.getAnnotation(Trigger.class));
+			validateTrigger(e, triggersList, e.getAnnotation(Triggers.class));
 			
 			String pathValue = (String)((VariableElement)e).getConstantValue();
 			String path = parentName + "." + e.getSimpleName().toString();
 			if(uri.type() == Type.DIR_AND_ITEM){
-				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggerMeta));
+				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList));
 				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), null));
 			}else{
-				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggerMeta));
+				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList));
 			}
 		}
 		return uris;
 	}
 	
-	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery, TriggerMeta trigger){
+	private void validateTrigger(Element e, List<TriggerMeta> triggersList, Triggers triggers){
+		if(triggers != null){
+			for(Trigger t : triggers.value()){
+				validateTrigger(e, triggersList, t);
+			}
+		}
+	}
+	
+	private void validateTrigger(Element e, List<TriggerMeta> triggers, Trigger trigger){
+		if(trigger == null){
+			return;
+		}
+		String triggerMethod = trigger.name().trim();
+		if(TextUtils.isEmpty(triggerMethod)){
+			throw new AnnotationParsingException("Trigger method name is empty", e);
+		}
+		triggers.add(new TriggerMeta(triggerMethod, trigger.type(), trigger.when() == When.BEFORE));
+	}
+	
+	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery, List<TriggerMeta> triggers){
 		if(type == Type.ITEM && !pathValue.endsWith("#")){
 			if(!pathValue.endsWith("/")){
 				path += " + \"/#\"";
@@ -151,8 +166,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		int typeMask = type == Type.DIR ? MATCH_TYPE_DIR : MATCH_TYPE_ITEM;
 		int code  = elementCode | typeMask;
 		elementCode += 0x0010;
-		logger.i("add: " + code + "; path = " + path + "; from = " + from);
-		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery, trigger);
+		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery, triggers);
 	}
 	
 	private String findName(Element element){

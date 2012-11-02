@@ -5,11 +5,11 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 public @interface Join {
-	String srcTable();
-	String srcColumn();
+	String joinTable();
+	String joinColumn();
 	
-	String destTable();
-	String destColumn();
+	String onTable();
+	String onColumn();
 	
 	Type type() default Type.INNER;
 	

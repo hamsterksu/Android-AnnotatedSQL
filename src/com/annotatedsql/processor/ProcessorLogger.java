@@ -25,7 +25,7 @@ public class ProcessorLogger{
 	}
 	
 	public void i(String msg, Element element){
-		messager.printMessage(Kind.NOTE, msg, element);
+		//messager.printMessage(Kind.NOTE, msg, element);
 	}
 	
 	public void e(String msg, Throwable e, Element element){
@@ -42,6 +42,16 @@ public class ProcessorLogger{
 	
 	public void e(String msg, Element e){
 		e(msg, null, e);
+	}
+	
+	public void e(String msg, Element...elms){
+		if(elms != null){
+			for(Element e : elms){
+				e(msg, null, e);
+			}
+		}else{
+			e(msg, null, null);
+		}
 	}
 	
 }

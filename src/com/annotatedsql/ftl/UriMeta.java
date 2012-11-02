@@ -1,5 +1,7 @@
 package com.annotatedsql.ftl;
 
+import java.util.List;
+
 public class UriMeta {
 
 	private final String path;
@@ -10,9 +12,9 @@ public class UriMeta {
 	private final String selectColumn;
 	private final String altNotify;
 	private final boolean onlyQuery;
-	private final TriggerMeta trigger;
+	private final List<TriggerMeta> triggers;
 	
-	public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String altNotify, boolean onlyQuery, TriggerMeta trigger) {
+	public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String altNotify, boolean onlyQuery, List<TriggerMeta> triggers) {
 		super();
 		this.path = path;
 		this.code = code;
@@ -21,7 +23,7 @@ public class UriMeta {
 		this.selectColumn = selectColumn;
 		this.altNotify = altNotify;
 		this.onlyQuery = onlyQuery;
-		this.trigger = trigger;
+		this.triggers = triggers;
 		codeHex = "0x" + Integer.toHexString(code);
 	}
 	
@@ -57,11 +59,11 @@ public class UriMeta {
 		return onlyQuery;
 	}
 
-	public TriggerMeta getTrigger() {
-		return trigger;
+	public List<TriggerMeta> getTriggers() {
+		return triggers;
 	}
 	
 	public boolean isTriggered() {
-		return trigger != null;
+		return triggers != null && triggers.size() != 0;
 	}
 }

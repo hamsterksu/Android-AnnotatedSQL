@@ -1,5 +1,6 @@
 package com.annotatedsql.processor.sql;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,9 @@ import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.Columns;
 import com.annotatedsql.annotation.sql.From;
 import com.annotatedsql.annotation.sql.Join;
+import com.annotatedsql.annotation.sql.RawJoin;
 import com.annotatedsql.annotation.sql.SimpleView;
+import com.annotatedsql.util.TextUtils;
 
 public class SimpleViewProcessor {
 
@@ -18,6 +21,7 @@ public class SimpleViewProcessor {
 	 * @throws AnnotationParsingException
 	 */
 	public static String create(Element c, Map<String, List<String>> tableColumns) {
+		HashMap<String, Element> aliases = new HashMap<String, Element>();
 		SimpleView view = c.getAnnotation(SimpleView.class);
 		String name = view.value();
 
@@ -33,48 +37,18 @@ public class SimpleViewProcessor {
 		for (Element f : fields) {
 			From tmpFrom = f.getAnnotation(From.class);
 			if (tmpFrom != null){
-				if(from != null){
-					throw new AnnotationParsingException("Dublicate @From annotation", f);
-				}
-				from = tmpFrom;
-				Columns columns = f.getAnnotation(Columns.class);
-				String[] selectedColumns = columns != null ? columns.value() : null;
-				
-				String asName = (String)((VariableElement)f).getConstantValue();
-				try{
-					addTableColumn(select, tableColumns.get(from.value()), selectedColumns, asName, true);
-				}catch (RuntimeException e) {
-					throw new AnnotationParsingException(e.getMessage(), f);
-				}
-				sql.insert(pos, " FROM " + from.value() + " AS " + asName);
+				from = proceedFrom(tableColumns, aliases, select, sql, pos,
+						from, f, tmpFrom);
 			}else{
 				Join join = f.getAnnotation(Join.class);
 				if(join != null){
-					Columns columns = f.getAnnotation(Columns.class);
-					String[] selectedColumns = columns != null ? columns.value() : null;
-					String asName = (String)((VariableElement)f).getConstantValue();
-					switch (join.type()) {
-						case INNER:
-							sql.append(" JOIN ");
-							break;
-						case LEFT:
-							sql.append(" LEFT OUTER JOIN ");
-							break;
-						case RIGHT:
-							sql.append(" RIGHT OUTER JOIN ");
-							break;
-						case CROSS:
-							sql.append(" CROSS JOIN ");
-							break;
-					}
-					sql.append(join.srcTable()).append(" AS ").append(asName)
-					.append(" ON ").append(asName).append('.').append(join.srcColumn())
-					.append(" = ").append(join.destTable()).append('.').append(join.destColumn());
-					try{
-						addTableColumn(select, tableColumns.get(join.srcTable()), selectedColumns, asName, false);
-					}catch (RuntimeException e) {
-						throw new AnnotationParsingException(e.getMessage(), f);
-					}
+					proceedJoin(tableColumns, aliases, select, sql, f, join);
+				}
+				RawJoin rawJoin = f.getAnnotation(RawJoin.class);
+				if(rawJoin != null){
+					if(join != null)
+						throw new AnnotationParsingException("element can have only one join", f);
+					proceedRawJoin(tableColumns, aliases, select, sql, f, rawJoin);
 				}
 			}
 		}
@@ -83,8 +57,94 @@ public class SimpleViewProcessor {
 		}
 		sql.insert(pos, select.toString());
 		sql.setCharAt(pos, ' ');
-		//sql.append(')');
 		return sql.toString();
+	}
+
+	private static void proceedJoin(Map<String, List<String>> tableColumns,
+			HashMap<String, Element> aliases, final StringBuilder select,
+			final StringBuilder sql, Element f, Join join) {
+		Columns columns = f.getAnnotation(Columns.class);
+		String[] selectedColumns = columns != null ? columns.value() : null;
+		String asName = (String)((VariableElement)f).getConstantValue();
+		checkAlias(aliases, f, asName);
+		switch (join.type()) {
+			case INNER:
+				sql.append(" JOIN ");
+				break;
+			case LEFT:
+				sql.append(" LEFT OUTER JOIN ");
+				break;
+			case RIGHT:
+				sql.append(" RIGHT OUTER JOIN ");
+				break;
+			case CROSS:
+				sql.append(" CROSS JOIN ");
+				break;
+		}
+		checkColumn(f, join.joinTable(), tableColumns.get(join.joinTable()), join.joinColumn());
+		//checkColumn(f, join.onTable(), tableColumns.get(join.onTable()), join.onColumn());
+		sql.append(join.joinTable()).append(" AS ").append(asName)
+		.append(" ON ").append(asName).append('.').append(join.joinColumn())
+		.append(" = ").append(join.onTable()).append('.').append(join.onColumn());
+		try{
+			addTableColumn(select, tableColumns.get(join.joinTable()), selectedColumns, asName, false);
+		}catch (RuntimeException e) {
+			throw new AnnotationParsingException(e.getMessage(), f);
+		}
+	}
+	
+	private static void proceedRawJoin(Map<String, List<String>> tableColumns,
+			HashMap<String, Element> aliases, final StringBuilder select,
+			final StringBuilder sql, Element f, RawJoin join) {
+		Columns columns = f.getAnnotation(Columns.class);
+		String[] selectedColumns = columns != null ? columns.value() : null;
+		String asName = (String)((VariableElement)f).getConstantValue();
+		checkAlias(aliases, f, asName);
+		if(TextUtils.isEmpty(join.onCondition())){
+			throw new AnnotationParsingException("'ON' condition is empty", f);
+		}
+		switch (join.type()) {
+			case INNER:
+				sql.append(" JOIN ");
+				break;
+			case LEFT:
+				sql.append(" LEFT OUTER JOIN ");
+				break;
+			case RIGHT:
+				sql.append(" RIGHT OUTER JOIN ");
+				break;
+			case CROSS:
+				sql.append(" CROSS JOIN ");
+				break;
+		}
+		sql.append(join.joinTable()).append(" AS ").append(asName).append(" ON ").append(join.onCondition());
+		try{
+			addTableColumn(select, tableColumns.get(join.joinTable()), selectedColumns, asName, false);
+		}catch (RuntimeException e) {
+			throw new AnnotationParsingException(e.getMessage(), f);
+		}
+	}
+
+	private static From proceedFrom(Map<String, List<String>> tableColumns,
+			HashMap<String, Element> aliases, final StringBuilder select,
+			final StringBuilder sql, final int pos, From from, Element f,
+			From tmpFrom) {
+		if(from != null){
+			throw new AnnotationParsingException("Dublicate @From annotation", f);
+		}
+		from = tmpFrom;
+		Columns columns = f.getAnnotation(Columns.class);
+		String[] selectedColumns = columns != null ? columns.value() : null;
+		
+		String asName = (String)((VariableElement)f).getConstantValue();
+		try{
+			addTableColumn(select, tableColumns.get(from.value()), selectedColumns, asName, true);
+		}catch (RuntimeException e) {
+			throw new AnnotationParsingException(e.getMessage(), f);
+		}
+		checkAlias(aliases, f, asName);
+		sql.insert(pos, " FROM " + from.value() + " AS " + asName);
+		return from;
 	}
 	
 	private static void addTableColumn(StringBuilder select, List<String> coluumns, String[] selectedColumns, String asName, boolean ignoreId){
@@ -93,7 +153,7 @@ public class SimpleViewProcessor {
 		if(selectedColumns != null && selectedColumns.length != 0){
 			for(String selCol : selectedColumns){
 				if(!coluumns.contains(selCol)){
-					throw new RuntimeException("Table doesn't have column with name '" + selCol + "'");
+					throw new RuntimeException("Table doesn't have column '" + selCol + "'");
 				}
 				addColumn(select, asName, ignoreId, selCol);
 			}
@@ -110,6 +170,18 @@ public class SimpleViewProcessor {
 		}else{
 			select.append(", ").append(asName).append('.').append(c).append(" as ").append(asName).append('_').append(c);
 		}
+	}
+	
+	private static void checkColumn(final Element e, final String tableName, final List<String> coluumns, final String column){
+		if(coluumns == null || coluumns.isEmpty() || TextUtils.isEmpty(column) || !coluumns.contains(column))
+			throw new AnnotationParsingException(String.format("Column '%s' doesn't exist in table '%s'", column, tableName), e);
+	}
+	
+	private static void checkAlias(HashMap<String, Element> aliases, Element e, String alias){
+		Element aliasElement = aliases.get(alias);
+		if(aliasElement != null)
+			throw new AnnotationParsingException(String.format("Duplicate alias '%s'", alias), e, aliasElement);
+		aliases.put(alias, e);
 	}
 	
 	
