@@ -24,17 +24,17 @@ import android.text.TextUtils;
 public class ${className} extends ContentProvider{
 
 	public static final String AUTHORITY = "${authority}";
-	private static final String FRAGMENT_NO_NOTIFY = "no-notify";
-	private static final String QUERY_LIMIT = "limit";
+	public static final String FRAGMENT_NO_NOTIFY = "no-notify";
+	public static final String QUERY_LIMIT = "limit";
 	
-	private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
+	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
-	private final static int MATCH_TYPE_ITEM = 0x0001;
-	private final static int MATCH_TYPE_DIR = 0x0002;
-	private final static int MATCH_TYPE_MASK = 0x000f;
+	protected final static int MATCH_TYPE_ITEM = 0x0001;
+	protected final static int MATCH_TYPE_DIR = 0x0002;
+	protected final static int MATCH_TYPE_MASK = 0x000f;
 	
 	<#list entities as e>
-	private final static int MATCH_${getMathcName(e.path)} = ${e.codeHex};
+	protected final static int MATCH_${getMathcName(e.path)} = ${e.codeHex};
 	</#list>
 	
 	private static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -45,8 +45,8 @@ public class ${className} extends ContentProvider{
 		</#list> 
 	}
 	
-	private SQLiteOpenHelper dbHelper;
-	private ContentResolver contentResolver;
+	protected SQLiteOpenHelper dbHelper;
+	protected ContentResolver contentResolver;
 
 	@Override
 	public boolean onCreate() {
@@ -264,11 +264,11 @@ public class ${className} extends ContentProvider{
 		</#if>
 	</#list>
 		
-	private static boolean ignoreNotify(Uri uri){
+	protected static boolean ignoreNotify(Uri uri){
 		return FRAGMENT_NO_NOTIFY.equals(uri.getFragment());
 	}
 	
-	private String composeIdSelection(String originalSelection, String id, String idColumn) {
+	protected String composeIdSelection(String originalSelection, String id, String idColumn) {
         StringBuffer sb = new StringBuffer();
         sb.append(idColumn).append('=').append(id);
         if (!TextUtils.isEmpty(originalSelection)) {
@@ -314,7 +314,7 @@ public class ${className} extends ContentProvider{
 	}
 	
 	<#if generateHelper>   
-	private class AnnotationSql extends SQLiteOpenHelper {
+	protected class AnnotationSql extends SQLiteOpenHelper {
 
 		public AnnotationSql(Context context) {
 			super(context, ${schemaClassName}.DB_NAME, null, ${schemaClassName}.DB_VERSION);
