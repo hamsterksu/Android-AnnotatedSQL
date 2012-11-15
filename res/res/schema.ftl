@@ -12,20 +12,20 @@ public class ${className}{
 	public static final String DB_NAME = "${dbName}";
 	public static final int DB_VERSION = ${dbVersion};
 		 
-	 <#list tables as table>
-	 private static final String SQL_CREATE_${table.tableName?upper_case} = "${table.sql}";
+	<#list tables as table>
+	public static final String SQL_CREATE_${table.tableName?upper_case} = "${table.sql}";
 	 
-	 </#list>
+	</#list>
 	 
-	 <#list indexes as index>
-	 private static final String SQL_CREATE_${index.indexName?upper_case} = "${index.sql}";
+	<#list indexes as index>
+	public static final String SQL_CREATE_${index.indexName?upper_case} = "${index.sql}";
 	 
-	 </#list>
+	</#list>
 	 
-	 <#list views as view>
-	 private static final String SQL_CREATE_${view.viewName?upper_case} = "${view.sql}";
+	<#list views as view>
+	public static final String SQL_CREATE_${view.viewName?upper_case} = "${view.sql}";
 	 
-	 </#list>
+	</#list>
 	
 	public static void onCreate(final SQLiteDatabase db) {
 		<#list tables as table>
