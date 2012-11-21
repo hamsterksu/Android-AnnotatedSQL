@@ -283,6 +283,12 @@ public class ${className} extends ContentProvider{
 		return BASE_URI.buildUpon().appendPath(path).build(); 
 	}
 	
+	public static Uri getContentUriGroupBy(String path, String groupBy){
+		if(TextUtils.isEmpty(path))
+			return null;
+		return BASE_URI.buildUpon().appendPath(path).appendQueryParameter(QUERY_GROUP_BY, groupBy).build(); 
+	}
+	
 	public static Uri getContentUri(String path, long id){
 		if(TextUtils.isEmpty(path))
 			return null;
