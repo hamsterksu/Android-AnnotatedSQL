@@ -26,6 +26,7 @@ public class ${className} extends ContentProvider{
 	public static final String AUTHORITY = "${authority}";
 	public static final String FRAGMENT_NO_NOTIFY = "no-notify";
 	public static final String QUERY_LIMIT = "limit";
+	public static final String QUERY_GROUP_BY = "groupBy";
 	
 	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
@@ -37,7 +38,7 @@ public class ${className} extends ContentProvider{
 	protected final static int MATCH_${getMathcName(e.path)} = ${e.codeHex};
 	</#list>
 	
-	private static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+	protected static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 
 	static {
 		<#list entities as e>
@@ -79,7 +80,6 @@ public class ${className} extends ContentProvider{
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		final SQLiteQueryBuilder query = new SQLiteQueryBuilder();
-		String groupBy = null;
 		switch (matcher.match(uri)) {
 			<#list entities as e>
 			case MATCH_${getMathcName(e.path)}:{
@@ -95,7 +95,7 @@ public class ${className} extends ContentProvider{
 		}
 		Cursor c = query.query(dbHelper.getReadableDatabase(),
         		projection, selection, selectionArgs,
-        		groupBy, null, sortOrder, uri.getQueryParameter(QUERY_LIMIT));
+        		uri.getQueryParameter(QUERY_GROUP_BY), null, sortOrder, uri.getQueryParameter(QUERY_LIMIT));
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 		
 		return c;
