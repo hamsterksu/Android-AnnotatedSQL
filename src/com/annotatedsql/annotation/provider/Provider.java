@@ -7,4 +7,10 @@ public @interface Provider {
 	String authority();
 	String openHelperClass() default "";
 	
+	/**
+	 * wrap methods bulkInsert and applyBatch to transaction 
+	 * @return
+	 */
+	boolean supportTransaction() default true; 
+	
 }

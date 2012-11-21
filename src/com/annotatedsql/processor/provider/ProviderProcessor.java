@@ -87,6 +87,7 @@ public class ProviderProcessor extends AbstractProcessor{
 				provider.setSchemaClassName(providerElement.schemaClass());
 				provider.setOpenHelperClass(providerElement.openHelperClass());
 				provider.setAuthority(providerElement.authority());
+				provider.setSupportTransaction(providerElement.supportTransaction());
 			}
 		}else{
 			return false;

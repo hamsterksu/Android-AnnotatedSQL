@@ -12,6 +12,7 @@ public class ProviderMeta {
 	private String schemaClassName;
 	private String authority;
 	private String openHelperClass;
+	private boolean supportTransaction;
 	
 	private List<UriMeta> entities = new ArrayList<UriMeta>();
 	private List<String> imports = new ArrayList<String>();
@@ -74,5 +75,13 @@ public class ProviderMeta {
 	
 	public boolean isGenerateHelper(){
 		return TextUtils.isEmpty(openHelperClass);
+	}
+	
+	public void setSupportTransaction(boolean supportTransaction) {
+		this.supportTransaction = supportTransaction;
+	}
+	
+	public boolean isSupportTransaction() {
+		return supportTransaction;
 	}
 }

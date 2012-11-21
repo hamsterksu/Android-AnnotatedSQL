@@ -8,7 +8,12 @@ package ${pkgName};
 <#list imports as import>
 import ${import};	 
 </#list> 
-		
+
+import java.util.ArrayList;
+
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
+import android.content.OperationApplicationException;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -100,6 +105,37 @@ public class ${className} extends ContentProvider{
 		
 		return c;
 	}
+
+<#if supportTransaction>
+	@Override
+	public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+		SQLiteDatabase sql = dbHelper.getWritableDatabase();
+		sql.beginTransaction();
+		ContentProviderResult[] res = null;
+		try{
+			res = super.applyBatch(operations);
+			sql.setTransactionSuccessful();
+		}finally{
+			sql.endTransaction();
+		}
+		return res;
+	}
+
+	
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+    	SQLiteDatabase sql = dbHelper.getWritableDatabase();
+		sql.beginTransaction();
+		int count = 0;
+		try {
+			count = super.bulkInsert(uri, values);
+			sql.setTransactionSuccessful();
+		} finally {
+			sql.endTransaction();
+		}
+    	return count;
+    }
+</#if>
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
