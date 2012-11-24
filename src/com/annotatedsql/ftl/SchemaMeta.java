@@ -14,6 +14,7 @@ public class SchemaMeta {
 	private final List<TableMeta> tables = new ArrayList<TableMeta>();
 	private final List<IndexMeta> indexes = new ArrayList<IndexMeta>();
 	private final List<ViewMeta> views = new ArrayList<ViewMeta>();
+	private final List<ViewMeta> queries = new ArrayList<ViewMeta>();
 	
 	public SchemaMeta(String className) {
 		super();
@@ -38,6 +39,10 @@ public class SchemaMeta {
 
 	public void addIndex(IndexMeta indexMeta) {
 		indexes.add(indexMeta);
+	}
+	
+	public void addQuery(ViewMeta table){
+		queries.add(table);
 	}
 	
 	public void setPkgName(String pkgName) {
@@ -74,5 +79,9 @@ public class SchemaMeta {
 	
 	public int getDbVersion() {
 		return dbVersion;
+	}
+	
+	public List<ViewMeta> getQueries() {
+		return queries;
 	}
 }

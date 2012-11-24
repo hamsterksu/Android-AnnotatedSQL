@@ -66,7 +66,7 @@ public class SimpleViewProcessor {
 		return sql.toString();
 	}
 
-	private static void proceedJoin(Map<String, List<String>> tableColumns,
+	public static void proceedJoin(Map<String, List<String>> tableColumns,
 			HashMap<String, Element> aliases, final StringBuilder select,
 			final StringBuilder sql, Element f, Join join,  ArrayList<String> selectColumns) {
 		Columns columns = f.getAnnotation(Columns.class);
@@ -99,7 +99,7 @@ public class SimpleViewProcessor {
 		}
 	}
 	
-	private static void proceedRawJoin(Map<String, List<String>> tableColumns,
+	public static void proceedRawJoin(Map<String, List<String>> tableColumns,
 			HashMap<String, Element> aliases, final StringBuilder select,
 			final StringBuilder sql, Element f, RawJoin join,  ArrayList<String> selectColumns) {
 		Columns columns = f.getAnnotation(Columns.class);
@@ -131,7 +131,7 @@ public class SimpleViewProcessor {
 		}
 	}
 
-	private static From proceedFrom(Map<String, List<String>> tableColumns,
+	public static From proceedFrom(Map<String, List<String>> tableColumns,
 			HashMap<String, Element> aliases, final StringBuilder select,
 			final StringBuilder sql, final int pos, From from, Element f,
 			From tmpFrom, ArrayList<String> selectColumns) {
@@ -153,7 +153,7 @@ public class SimpleViewProcessor {
 		return from;
 	}
 	
-	private static void addTableColumn(StringBuilder select, List<String> coluumns, String[] selectedColumns, String asName, boolean ignoreId, ArrayList<String> selectColumns){
+	public static void addTableColumn(StringBuilder select, List<String> coluumns, String[] selectedColumns, String asName, boolean ignoreId, ArrayList<String> selectColumns){
 		if(coluumns == null || coluumns.isEmpty())
 			return;
 		if(selectedColumns != null && selectedColumns.length != 0){
@@ -170,7 +170,7 @@ public class SimpleViewProcessor {
 		}
 	}
 
-	private static void addColumn(StringBuilder select, String asName, boolean ignoreId, String c, ArrayList<String> selectColumns) {
+	public static void addColumn(StringBuilder select, String asName, boolean ignoreId, String c, ArrayList<String> selectColumns) {
 		if(ignoreId && "_id".equals(c)){
 			selectColumns.add(c);
 			select.append(", ").append(asName).append('.').append(c);
@@ -181,12 +181,12 @@ public class SimpleViewProcessor {
 		}
 	}
 	
-	private static void checkColumn(final Element e, final String tableName, final List<String> coluumns, final String column){
+	public static void checkColumn(final Element e, final String tableName, final List<String> coluumns, final String column){
 		if(coluumns == null || coluumns.isEmpty() || TextUtils.isEmpty(column) || !coluumns.contains(column))
 			throw new AnnotationParsingException(String.format("Column '%s' doesn't exist in table '%s'", column, tableName), e);
 	}
 	
-	private static void checkAlias(HashMap<String, Element> aliases, Element e, String alias){
+	public static void checkAlias(HashMap<String, Element> aliases, Element e, String alias){
 		Element aliasElement = aliases.get(alias);
 		if(aliasElement != null)
 			throw new AnnotationParsingException(String.format("Duplicate alias '%s'", alias), e, aliasElement);
