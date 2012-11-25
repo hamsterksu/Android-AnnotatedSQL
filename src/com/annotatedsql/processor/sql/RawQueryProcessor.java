@@ -11,6 +11,7 @@ import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.From;
 import com.annotatedsql.annotation.sql.Join;
 import com.annotatedsql.annotation.sql.RawJoin;
+import com.annotatedsql.annotation.sql.RawQuery;
 import com.annotatedsql.annotation.sql.SimpleView;
 
 public class RawQueryProcessor {
@@ -22,8 +23,8 @@ public class RawQueryProcessor {
 		HashMap<String, Element> aliases = new HashMap<String, Element>();
 		ArrayList<String> selectColumns = new ArrayList<String>();
 		
-		SimpleView view = c.getAnnotation(SimpleView.class);
-		String name = view.value();
+		RawQuery q = c.getAnnotation(RawQuery.class);
+		String name = q.value();
 		if(tableColumns.containsKey(name)){
 			throw new AnnotationParsingException(String.format("Table/View/Query with name '%s' alredy defined", name), c);
 		}

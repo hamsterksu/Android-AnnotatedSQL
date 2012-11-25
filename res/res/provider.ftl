@@ -88,11 +88,20 @@ public class ${className} extends ContentProvider{
 		switch (matcher.match(uri)) {
 			<#list entities as e>
 			case MATCH_${getMathcName(e.path)}:{
+			<#if e.rawQuery>
+				Cursor c = dbHelper.getReadableDatabase().rawQuery(${schemaClassName}.${e.tableLink?upper_case}
+					+ (TextUtils.isEmpty(selection) ? "" : " where " + selection) 
+					+ (TextUtils.isEmpty(sortOrder) ? "" : " order by " + sortOrder)
+					, selectionArgs);
+				c.setNotificationUri(getContext().getContentResolver(), uri);
+				return c;  
+			<#else>
 				query.setTables(${e.tableLink});
 				<#if e.item>
 				query.appendWhere("${e.selectColumn} = " + uri.getLastPathSegment());
 				</#if>
 				break;
+			</#if>
 			}
 			</#list> 
 			default:
@@ -186,10 +195,12 @@ public class ${className} extends ContentProvider{
 				table = ${e.tableLink};
 				<#if e.item>
 				processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
-					<#if (e.altNotify?length > 0)>
+					<#if (e.hasAltNotify && e.itemizedAltNotify)>
 				alternativeNotify = getContentUri("${e.altNotify}", uri.getLastPathSegment());
+					<#elseif e.hasAltNotify>
+				alternativeNotify = getContentUri("${e.altNotify}");
 					</#if>
-				<#elseif (e.altNotify?length > 0)>
+				<#elseif (e.hasAltNotify)>
 				alternativeNotify = getContentUri("${e.altNotify}");
 				</#if>
 				break;
@@ -229,8 +240,10 @@ public class ${className} extends ContentProvider{
 				table = ${e.tableLink};
 				<#if e.item>
 				processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
-					<#if (e.altNotify?length > 0)>
+					<#if (e.hasAltNotify && e.itemizedAltNotify)>
 				alternativeNotify = getContentUri("${e.altNotify}", uri.getLastPathSegment());
+					<#elseif e.hasAltNotify>
+				alternativeNotify = getContentUri("${e.altNotify}");
 					</#if>
 				<#elseif (e.altNotify?length > 0)>
 				alternativeNotify = getContentUri("${e.altNotify}");

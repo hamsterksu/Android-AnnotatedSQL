@@ -11,19 +11,25 @@ public class ${className}{
 
 	public static final String DB_NAME = "${dbName}";
 	public static final int DB_VERSION = ${dbVersion};
-		 
+	
+	//tables	 
 	<#list tables as table>
 	public static final String SQL_CREATE_${table.tableName?upper_case} = "${table.sql}";
 	 
 	</#list>
-	 
+	//indexes 
 	<#list indexes as index>
 	public static final String SQL_CREATE_${index.indexName?upper_case} = "${index.sql}";
 	 
 	</#list>
-	 
+	//views
 	<#list views as view>
 	public static final String SQL_CREATE_${view.viewName?upper_case} = "${view.sql}";
+	 
+	</#list>
+	//queries	
+	<#list queries as q>
+	public static final String SQL_QUERY_${q.queryName?upper_case} = "${q.sql}";
 	 
 	</#list>
 	

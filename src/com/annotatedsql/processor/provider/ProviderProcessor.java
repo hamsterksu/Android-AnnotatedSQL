@@ -24,6 +24,7 @@ import com.annotatedsql.annotation.provider.Trigger.When;
 import com.annotatedsql.annotation.provider.Triggers;
 import com.annotatedsql.annotation.provider.URI;
 import com.annotatedsql.annotation.provider.URI.Type;
+import com.annotatedsql.annotation.sql.RawQuery;
 import com.annotatedsql.annotation.sql.SimpleView;
 import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.ProviderMeta;
@@ -102,11 +103,25 @@ public class ProviderProcessor extends AbstractProcessor{
 			provider.addImport(((TypeElement)element).getQualifiedName().toString());
 			provider.addUris(processTable(element));
 		}
+		
+		for (Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)) {
+			provider.addImport(((TypeElement)element).getQualifiedName().toString());
+			provider.addUris(processQuery(element));
+		}
 		processTemplateForModel(provider);
 		return true;
 	}
 	
 
+	private List<UriMeta> processQuery(Element element) {
+		String parentName = element.getSimpleName().toString();
+		RawQuery rawQuery = element.getAnnotation(RawQuery.class);
+		
+		String from = "SQL_QUERY_" + rawQuery.value().toUpperCase();
+		
+		return processUri(element, parentName, from, true);
+	}
+	
 	private List<UriMeta> processTable(Element element) {
 		String parentName = element.getSimpleName().toString();
 		String nameField = findName(element);
@@ -114,6 +129,10 @@ public class ProviderProcessor extends AbstractProcessor{
 			throw new AnnotationParsingException("Can't find table/view name. Please define field TABLE_NAME or VIEW_NAME ", element);
 		}
 		String from = parentName + "." + nameField; 
+		return processUri(element, parentName, from, false);
+	}
+
+	private List<UriMeta> processUri(Element element, String parentName, String from, boolean rawQuery) {
 		List<UriMeta> uris = new ArrayList<UriMeta>(); 
 		for(Element e : element.getEnclosedElements()){
 			URI uri = e.getAnnotation(URI.class);
@@ -127,11 +146,11 @@ public class ProviderProcessor extends AbstractProcessor{
 			
 			String pathValue = (String)((VariableElement)e).getConstantValue();
 			String path = parentName + "." + e.getSimpleName().toString();
-			if(uri.type() == Type.DIR_AND_ITEM){
-				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList));
-				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), null));
+			if(uri.type() == Type.DIR_AND_ITEM && !rawQuery){
+				uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList, rawQuery));
+				uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), null, rawQuery));
 			}else{
-				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList));
+				uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList, rawQuery));
 			}
 		}
 		return uris;
@@ -156,7 +175,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		triggers.add(new TriggerMeta(triggerMethod, trigger.type(), trigger.when() == When.BEFORE));
 	}
 	
-	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery, List<TriggerMeta> triggers){
+	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery){
 		if(type == Type.ITEM && !pathValue.endsWith("#")){
 			if(!pathValue.endsWith("/")){
 				path += " + \"/#\"";
@@ -167,7 +186,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		int typeMask = type == Type.DIR ? MATCH_TYPE_DIR : MATCH_TYPE_ITEM;
 		int code  = elementCode | typeMask;
 		elementCode += 0x0010;
-		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery, triggers);
+		return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery, triggers, rawQuery);
 	}
 	
 	private String findName(Element element){

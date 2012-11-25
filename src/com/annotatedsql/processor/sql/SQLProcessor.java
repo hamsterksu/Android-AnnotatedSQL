@@ -19,10 +19,12 @@ import javax.tools.JavaFileObject;
 
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.Index;
+import com.annotatedsql.annotation.sql.RawQuery;
 import com.annotatedsql.annotation.sql.Schema;
 import com.annotatedsql.annotation.sql.SimpleView;
 import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.IndexMeta;
+import com.annotatedsql.ftl.QueryMeta;
 import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.TableMeta;
 import com.annotatedsql.ftl.ViewMeta;
@@ -114,6 +116,13 @@ public class SQLProcessor extends AbstractProcessor {
 			SimpleView view = element.getAnnotation(SimpleView.class);
 			String sql = SimpleViewProcessor.create(element, tableColumns);
 			schema.addView(new ViewMeta(view.value(), sql));
+		}
+		
+		for(Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)){
+			logger.i("SQLProcessor raw query found: " + element.getSimpleName());
+			RawQuery rawQuery = element.getAnnotation(RawQuery.class);
+			String sql = RawQueryProcessor.create(element, tableColumns);
+			schema.addQuery(new QueryMeta(rawQuery.value(), sql));
 		}
 		if(schema.isEmpty()){
 			return false;
