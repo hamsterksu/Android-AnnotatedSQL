@@ -12,7 +12,7 @@ import com.annotatedsql.annotation.sql.From;
 import com.annotatedsql.annotation.sql.Join;
 import com.annotatedsql.annotation.sql.RawJoin;
 import com.annotatedsql.annotation.sql.RawQuery;
-import com.annotatedsql.annotation.sql.SimpleView;
+import com.annotatedsql.annotation.sql.SqlQuery;
 
 public class RawQueryProcessor {
 
@@ -39,7 +39,15 @@ public class RawQueryProcessor {
 		final int pos = sql.length();
 		
 		From from = null;
+		SqlQuery sqlQuery = null;
 		for (Element f : fields) {
+			sqlQuery = f.getAnnotation(SqlQuery.class);
+			if(sqlQuery != null){
+				sql.setLength(0);
+				sql.append(sqlQuery.value());
+				break;
+			}
+			
 			From tmpFrom = f.getAnnotation(From.class);
 			if (tmpFrom != null){
 				from = SimpleViewProcessor.proceedFrom(tableColumns, aliases, select, sql, pos, from, f, tmpFrom, selectColumns);
@@ -56,8 +64,8 @@ public class RawQueryProcessor {
 				}
 			}
 		}
-		if(from == null){
-			throw new AnnotationParsingException("Query doesn't have @From annotation", c);
+		if(from == null && sqlQuery == null){
+			throw new AnnotationParsingException("Query doesn't have @From/@SqlQuery annotation", c);
 		}
 		sql.insert(pos, select.toString());
 		sql.setCharAt(pos, ' ');
