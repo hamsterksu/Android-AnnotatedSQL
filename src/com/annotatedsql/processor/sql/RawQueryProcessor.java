@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.VariableElement;
 
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.From;
@@ -44,7 +45,8 @@ public class RawQueryProcessor {
 			sqlQuery = f.getAnnotation(SqlQuery.class);
 			if(sqlQuery != null){
 				sql.setLength(0);
-				sql.append(sqlQuery.value());
+				String sqlText = (String)((VariableElement)f).getConstantValue();
+				sql.append(sqlText);
 				break;
 			}
 			
@@ -67,8 +69,10 @@ public class RawQueryProcessor {
 		if(from == null && sqlQuery == null){
 			throw new AnnotationParsingException("Query doesn't have @From/@SqlQuery annotation", c);
 		}
-		sql.insert(pos, select.toString());
-		sql.setCharAt(pos, ' ');
+		if(sqlQuery == null){
+			sql.insert(pos, select.toString());
+			sql.setCharAt(pos, ' ');
+		}
 		return sql.toString();
 	}
 }
