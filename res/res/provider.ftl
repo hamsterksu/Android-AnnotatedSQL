@@ -169,7 +169,7 @@ public class ${className} extends ContentProvider{
 		<#list entities as e>
 			<@addInsertBeforeTrigger uri=e />
 		</#list>
-		dbHelper.getWritableDatabase().insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+		long id = dbHelper.getWritableDatabase().insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 		<#list entities as e>
 			<@addInsertAfterTrigger uri=e />
 		</#list>
@@ -179,7 +179,7 @@ public class ${className} extends ContentProvider{
 				contentResolver.notifyChange(alternativeNotify, null);
 			}
 		}
-		return uri;
+		return Uri.withAppendedPath(uri, String.valueOf(id));
 	}
 	
 	@Override
