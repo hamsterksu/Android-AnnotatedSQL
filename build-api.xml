@@ -7,18 +7,18 @@
     <property name="version" value="1.0"/>
     
     <path id="AnnotatedSQLProcessor.classpath">
-        <pathelement location="bin"/>
+        <pathelement location="bin-annotations"/>
     </path>
     <target name="init">
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
+        <mkdir dir="bin-annotations"/>
+        <copy includeemptydirs="false" todir="bin-annotations">
             <fileset dir="src">
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
     </target>
     <target name="clean">
-        <delete dir="bin"/>
+        <delete dir="bin-annotations"/>
     </target>
 	
 	<target depends="init" name="build-project">
@@ -30,7 +30,8 @@
     </target>
     
     <target name="build" depends="clean, build-project">
-        <buildnumber file="api-build.number"/>
-        <jar destfile="sqlannotation-api-${version}.${build.number}.jar" basedir="bin"></jar>
+        <!--buildnumber file="api-build.number"/-->
+        <jar destfile="sqlannotation-annotations.jar" basedir="bin"></jar>
+    	<delete dir="bin-annotations"/>
 	</target>
 </project>

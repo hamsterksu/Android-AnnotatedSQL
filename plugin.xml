@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.7"?>
+<?eclipse version="3.6"?>
 <plugin>
 	<extension
          point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
@@ -8,6 +8,18 @@
                 <java6processor class="com.annotatedsql.processor.sql.SQLProcessor"/>
          </java6processors>
 	</extension>
+	<extension point="org.eclipse.jdt.core.classpathContainerInitializer">
+		<classpathContainerInitializer id="com.annotatedsql.LIBRARY" 
+			class="com.annotatedsql.classlibrary.ClassPathInitializerImpl"/>
+	</extension>
+	<extension point="org.eclipse.jdt.ui.classpathContainerPage">
+        <classpathContainerPage
+            name="AnnotatedSQL Classpath Container"
+            class="com.annotatedsql.classlibrary.ClassPathContainerPage"
+            id="com.annotatedsql.LIBRARY">
+        </classpathContainerPage>
+    </extension>
+    
  	<extension point="org.eclipse.ui.editors.templates">
 	     <template
 	           autoinsert="true"
