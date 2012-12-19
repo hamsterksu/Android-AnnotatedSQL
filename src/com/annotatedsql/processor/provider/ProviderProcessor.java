@@ -86,7 +86,9 @@ public class ProviderProcessor extends AbstractProcessor{
 				PackageElement pkg = (PackageElement)e.getEnclosingElement();
 				provider.setPkgName(pkg.getQualifiedName().toString());
 				provider.setSchemaClassName(providerElement.schemaClass());
+				
 				provider.setOpenHelperClass(providerElement.openHelperClass());
+				
 				provider.setAuthority(providerElement.authority());
 				provider.setSupportTransaction(providerElement.supportTransaction());
 			}
@@ -95,23 +97,31 @@ public class ProviderProcessor extends AbstractProcessor{
 		}
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
-			provider.addImport(((TypeElement)element).getQualifiedName().toString());
-			provider.addUris(processTable(element));
+			List<UriMeta> uris = processTable(element);
+			if(uris != null && !uris.isEmpty()){
+				provider.addImport(((TypeElement)element).getQualifiedName().toString());
+				provider.addUris(uris);
+			}
 		}
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)) {
-			provider.addImport(((TypeElement)element).getQualifiedName().toString());
-			provider.addUris(processTable(element));
+			List<UriMeta> uris = processTable(element);
+			if(uris != null && !uris.isEmpty()){
+				provider.addImport(((TypeElement)element).getQualifiedName().toString());
+				provider.addUris(uris);
+			}
 		}
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)) {
-			provider.addImport(((TypeElement)element).getQualifiedName().toString());
-			provider.addUris(processQuery(element));
+			List<UriMeta> uris = processTable(element);
+			if(uris != null && !uris.isEmpty()){
+				provider.addImport(((TypeElement)element).getQualifiedName().toString());
+				provider.addUris(processQuery(element));
+			}
 		}
 		processTemplateForModel(provider);
 		return true;
 	}
-	
 
 	private List<UriMeta> processQuery(Element element) {
 		String parentName = element.getSimpleName().toString();

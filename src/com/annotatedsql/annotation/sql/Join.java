@@ -8,7 +8,7 @@ public @interface Join {
 	String joinTable();
 	String joinColumn();
 	
-	String onTable();
+	String onTableAlias();
 	String onColumn();
 	
 	Type type() default Type.INNER;

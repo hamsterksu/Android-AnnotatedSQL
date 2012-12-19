@@ -11,6 +11,7 @@ import javax.lang.model.element.VariableElement;
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.Columns;
 import com.annotatedsql.annotation.sql.From;
+import com.annotatedsql.annotation.sql.IgnoreColumns;
 import com.annotatedsql.annotation.sql.Join;
 import com.annotatedsql.annotation.sql.RawJoin;
 import com.annotatedsql.annotation.sql.SimpleView;
@@ -69,6 +70,7 @@ public class SimpleViewProcessor {
 	public static void proceedJoin(Map<String, List<String>> tableColumns,
 			HashMap<String, Element> aliases, final StringBuilder select,
 			final StringBuilder sql, Element f, Join join,  ArrayList<String> selectColumns) {
+		boolean ignoreColumns = f.getAnnotation(IgnoreColumns.class) != null;
 		Columns columns = f.getAnnotation(Columns.class);
 		String[] selectedColumns = columns != null ? columns.value() : null;
 		String asName = (String)((VariableElement)f).getConstantValue();
@@ -91,9 +93,9 @@ public class SimpleViewProcessor {
 		//checkColumn(f, join.onTable(), tableColumns.get(join.onTable()), join.onColumn());
 		sql.append(join.joinTable()).append(" AS ").append(asName)
 		.append(" ON ").append(asName).append('.').append(join.joinColumn())
-		.append(" = ").append(join.onTable()).append('.').append(join.onColumn());
+		.append(" = ").append(join.onTableAlias()).append('.').append(join.onColumn());
 		try{
-			addTableColumn(select, tableColumns.get(join.joinTable()), selectedColumns, asName, false, selectColumns);
+			addTableColumn(select, ignoreColumns ? null : tableColumns.get(join.joinTable()), selectedColumns, asName, false, selectColumns);
 		}catch (RuntimeException e) {
 			throw new AnnotationParsingException(e.getMessage(), f);
 		}
@@ -102,6 +104,8 @@ public class SimpleViewProcessor {
 	public static void proceedRawJoin(Map<String, List<String>> tableColumns,
 			HashMap<String, Element> aliases, final StringBuilder select,
 			final StringBuilder sql, Element f, RawJoin join,  ArrayList<String> selectColumns) {
+		
+		boolean ignoreColumns = f.getAnnotation(IgnoreColumns.class) != null;
 		Columns columns = f.getAnnotation(Columns.class);
 		String[] selectedColumns = columns != null ? columns.value() : null;
 		String asName = (String)((VariableElement)f).getConstantValue();
@@ -125,7 +129,7 @@ public class SimpleViewProcessor {
 		}
 		sql.append(join.joinTable()).append(" AS ").append(asName).append(" ON ").append(join.onCondition());
 		try{
-			addTableColumn(select, tableColumns.get(join.joinTable()), selectedColumns, asName, false, selectColumns);
+			addTableColumn(select, ignoreColumns ? null : tableColumns.get(join.joinTable()), selectedColumns, asName, false, selectColumns);
 		}catch (RuntimeException e) {
 			throw new AnnotationParsingException(e.getMessage(), f);
 		}
@@ -139,12 +143,14 @@ public class SimpleViewProcessor {
 			throw new AnnotationParsingException("Dublicate @From annotation", f);
 		}
 		from = tmpFrom;
+		
+		boolean ignoreColumns = f.getAnnotation(IgnoreColumns.class) != null;
 		Columns columns = f.getAnnotation(Columns.class);
 		String[] selectedColumns = columns != null ? columns.value() : null;
 		
 		String asName = (String)((VariableElement)f).getConstantValue();
 		try{
-			addTableColumn(select, tableColumns.get(from.value()), selectedColumns, asName, true, selectColumns);
+			addTableColumn(select, ignoreColumns ? null : tableColumns.get(from.value()), selectedColumns, asName, true, selectColumns);
 		}catch (RuntimeException e) {
 			throw new AnnotationParsingException(e.getMessage(), f);
 		}

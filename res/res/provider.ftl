@@ -147,6 +147,7 @@ public class ${className} extends ContentProvider{
 </#if>
 
 	@Override
+	@SuppressWarnings("unused")
 	public Uri insert(Uri uri, ContentValues values) {
 		String table;
 		Uri alternativeNotify = null;
@@ -183,6 +184,7 @@ public class ${className} extends ContentProvider{
 	}
 	
 	@Override
+	@SuppressWarnings("unused")
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		String table;
         String processedSelection = selection;
@@ -228,6 +230,7 @@ public class ${className} extends ContentProvider{
 	}
 	
 	@Override
+	@SuppressWarnings("unused")
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		String table;
         String processedSelection = selection;

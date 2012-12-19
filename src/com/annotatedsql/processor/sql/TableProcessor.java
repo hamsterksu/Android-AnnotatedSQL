@@ -44,11 +44,11 @@ public class TableProcessor {
 			throw new AnnotationParsingException("Table doesn't have columns", c);
 		
 		PrimaryKey pk = (PrimaryKey)c.getAnnotation(PrimaryKey.class);
-		if(pk != null && pk.collumns().length > 0){
+		if(pk != null && pk.columns().length > 0){
 			if(hasPrimaryKey){
 				throw new AnnotationParsingException("Table has more that one PRIMARY KEY", c);
 			}
-			proceedPk(sql, pk.collumns());
+			proceedPk(sql, pk.columns());
 		}
 		sql.setCharAt(pos, '(');
         sql.append(')');
