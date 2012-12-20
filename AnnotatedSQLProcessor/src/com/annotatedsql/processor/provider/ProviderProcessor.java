@@ -113,7 +113,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		}
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)) {
-			List<UriMeta> uris = processTable(element);
+			List<UriMeta> uris = processQuery(element);
 			if(uris != null && !uris.isEmpty()){
 				provider.addImport(((TypeElement)element).getQualifiedName().toString());
 				provider.addUris(processQuery(element));

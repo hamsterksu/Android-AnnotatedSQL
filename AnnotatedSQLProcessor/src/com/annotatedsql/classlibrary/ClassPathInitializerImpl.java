@@ -12,7 +12,7 @@ public class ClassPathInitializerImpl extends ClasspathContainerInitializer {
 	@Override
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
 		
-		ClassPathContainerImpl container = new ClassPathContainerImpl(containerPath, containerPath.toFile());
+		ClassPathContainerImpl container = new ClassPathContainerImpl(containerPath);
 		JavaCore.setClasspathContainer(containerPath, 
 				new IJavaProject[] {project}, 
 				new IClasspathContainer[] {container}, 
