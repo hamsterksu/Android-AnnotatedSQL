@@ -1,5 +1,7 @@
 package com.annotatedsql.ftl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.annotatedsql.util.TextUtils;
@@ -12,23 +14,33 @@ public class UriMeta {
 	private final String codeHex;
 	private final boolean isItem;
 	private final String selectColumn;
-	private final String altNotify;
+	private final List<AltNotify> altNotify;
 	private final boolean onlyQuery;
 	private final List<TriggerMeta> triggers;
 	private final boolean rawQuery;
 	
-	public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery) {
+	public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String[] altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery) {
 		super();
 		this.path = path;
 		this.code = code;
 		this.tableLink = tableLink;
 		this.isItem = isItem;
 		this.selectColumn = selectColumn;
-		this.altNotify = altNotify;
 		this.onlyQuery = onlyQuery;
 		this.triggers = triggers;
 		this.rawQuery = rawQuery;
 		codeHex = "0x" + Integer.toHexString(code);
+		
+		if(altNotify != null && altNotify.length != 0){
+			this.altNotify = new ArrayList<AltNotify>();
+			for(String n : altNotify){
+				if(!TextUtils.isEmpty(n)){
+					this.altNotify.add(new AltNotify(n));
+				}
+			}
+		}else{
+			this.altNotify = Collections.emptyList();
+		}
 	}
 	
 	public String getPath() {
@@ -55,10 +67,7 @@ public class UriMeta {
 		return selectColumn;
 	}
 	
-	public String getAltNotify() {
-		if(altNotify.length() > 2 && isItemizedAltNotify()){
-			return altNotify.substring(0, altNotify.length() - 2);
-		}
+	public List<AltNotify> getAltNotify() {
 		return altNotify;
 	}
 	
@@ -79,10 +88,7 @@ public class UriMeta {
 	}
 	
 	public boolean isHasAltNotify() {
-		return !TextUtils.isEmpty(altNotify);
+		return !altNotify.isEmpty();
 	}
 	
-	public boolean isItemizedAltNotify() {
-		return !TextUtils.isEmpty(altNotify) && altNotify.endsWith("/#");
-	}
 }

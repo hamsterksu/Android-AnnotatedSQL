@@ -185,7 +185,7 @@ public class ProviderProcessor extends AbstractProcessor{
 		triggers.add(new TriggerMeta(triggerMethod, trigger.type(), trigger.when() == When.BEFORE));
 	}
 	
-	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery){
+	private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String[] altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery){
 		if(type == Type.ITEM && !pathValue.endsWith("#")){
 			if(!pathValue.endsWith("/")){
 				path += " + \"/#\"";

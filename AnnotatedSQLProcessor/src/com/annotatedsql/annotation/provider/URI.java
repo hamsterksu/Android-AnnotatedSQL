@@ -8,7 +8,7 @@ public @interface URI {
 	
 	String column() default "_id";
 	Type type() default Type.DIR_AND_ITEM;
-	String altNotify() default "";
+	String[] altNotify() default {};
 	boolean onlyQuery() default false;
 	
 	public static enum Type{DIR, ITEM, DIR_AND_ITEM}

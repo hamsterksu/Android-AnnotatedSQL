@@ -2,13 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AnnotatedSQL
 Bundle-SymbolicName: com.annotatedsql.AnnotatedSQL;singleton:=true
-Bundle-Version: 1.3
+Bundle-Version: 1.5.0
 Bundle-ClassPath: lib/codemodel-2.4.1.jar,
  lib/freemarker.jar,
  AnnotatedSQLProcessor.jar
-Export-Package: com.annotatedsql;uses:="org.eclipse.core.runtime,org.osgi.framework",
- com.annotatedsql.annotation.provider,
- com.annotatedsql.annotation.sql
+Export-Package: com.annotatedsql;uses:="org.eclipse.core.runtime,org.osgi.framework"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.annotatedsql.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

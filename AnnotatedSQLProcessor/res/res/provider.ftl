@@ -150,16 +150,12 @@ public class ${className} extends ContentProvider{
 	@SuppressWarnings("unused")
 	public Uri insert(Uri uri, ContentValues values) {
 		String table;
-		Uri alternativeNotify = null;
 		
 		switch(matcher.match(uri)){
 			<#list entities as e>
 			<#if !e.item && !e.onlyQuery>
 			case MATCH_${getMathcName(e.path)}:{
 				table = ${e.tableLink};
-				<#if (e.altNotify?length > 0)>
-				alternativeNotify = getContentUri("${e.altNotify}");
-				</#if>
 				break;
 			}
 			</#if>
@@ -175,10 +171,7 @@ public class ${className} extends ContentProvider{
 			<@addInsertAfterTrigger uri=e />
 		</#list>
 		if(!ignoreNotify(uri)){
-			contentResolver.notifyChange(uri, null);
-			if(alternativeNotify != null){
-				contentResolver.notifyChange(alternativeNotify, null);
-			}
+			notifyUri(contentResolver, uri);
 		}
 		return Uri.withAppendedPath(uri, String.valueOf(id));
 	}
@@ -188,7 +181,6 @@ public class ${className} extends ContentProvider{
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		String table;
         String processedSelection = selection;
-        Uri alternativeNotify = null;
         
 		switch(matcher.match(uri)){
 			<#list entities as e>
@@ -197,13 +189,6 @@ public class ${className} extends ContentProvider{
 				table = ${e.tableLink};
 				<#if e.item>
 				processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
-					<#if (e.hasAltNotify && e.itemizedAltNotify)>
-				alternativeNotify = getContentUri("${e.altNotify}", uri.getLastPathSegment());
-					<#elseif e.hasAltNotify>
-				alternativeNotify = getContentUri("${e.altNotify}");
-					</#if>
-				<#elseif (e.hasAltNotify)>
-				alternativeNotify = getContentUri("${e.altNotify}");
 				</#if>
 				break;
 			}
@@ -220,10 +205,7 @@ public class ${className} extends ContentProvider{
 			<@addUpdateAfterTrigger uri=e />
 		</#list>
 		if(!ignoreNotify(uri)){
-			contentResolver.notifyChange(uri, null);
-			if(alternativeNotify != null){
-				contentResolver.notifyChange(alternativeNotify, null);
-			}
+			notifyUri(contentResolver, uri);
 		}
 		
 		return count;
@@ -234,7 +216,6 @@ public class ${className} extends ContentProvider{
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		String table;
         String processedSelection = selection;
-        Uri alternativeNotify = null;
         
 		switch(matcher.match(uri)){
 			<#list entities as e>
@@ -243,13 +224,6 @@ public class ${className} extends ContentProvider{
 				table = ${e.tableLink};
 				<#if e.item>
 				processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
-					<#if (e.hasAltNotify && e.itemizedAltNotify)>
-				alternativeNotify = getContentUri("${e.altNotify}", uri.getLastPathSegment());
-					<#elseif e.hasAltNotify>
-				alternativeNotify = getContentUri("${e.altNotify}");
-					</#if>
-				<#elseif (e.altNotify?length > 0)>
-				alternativeNotify = getContentUri("${e.altNotify}");
 				</#if>
 				break;
 			}
@@ -266,10 +240,7 @@ public class ${className} extends ContentProvider{
 			<@addDeleteAfterTrigger uri=e />
 		</#list>
 		if(!ignoreNotify(uri)){
-			contentResolver.notifyChange(uri, null);
-			if(alternativeNotify != null){
-				contentResolver.notifyChange(alternativeNotify, null);
-			}
+			notifyUri(contentResolver, uri);
 		}
 		return count;
 	}
@@ -315,7 +286,29 @@ public class ${className} extends ContentProvider{
 			</#list>
 		</#if>
 	</#list>
-		
+	
+	public static void notifyUri(ContentResolver cr, Uri uri){
+		switch(matcher.match(uri)){
+			<#list entities as e>
+			<#if (e.hasAltNotify)>
+			case MATCH_${getMathcName(e.path)}:{
+				cr.notifyChange(uri, null);
+				<#list e.altNotify as alt>
+					<#if e.item && alt.itemizedAltNotify>
+				cr.notifyChange(getContentUri("${alt.value}", uri.getLastPathSegment()), null);
+					<#else>
+				cr.notifyChange(getContentUri("${alt.value}"), null);
+					</#if>
+				</#list>
+				break;
+			}
+			</#if>
+			</#list> 
+			default:
+				throw new IllegalArgumentException("Unsupported uri " + uri);
+		}
+	}
+	
 	protected static boolean ignoreNotify(Uri uri){
 		return FRAGMENT_NO_NOTIFY.equals(uri.getFragment());
 	}

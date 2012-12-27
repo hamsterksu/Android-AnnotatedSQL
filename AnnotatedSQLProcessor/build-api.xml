@@ -9,21 +9,16 @@
     <path id="AnnotatedSQLProcessor.classpath">
         <pathelement location="bin-annotations"/>
     </path>
-    <target name="init">
-        <mkdir dir="bin-annotations"/>
-        <copy includeemptydirs="false" todir="bin-annotations">
-            <fileset dir="src">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
+    
     <target name="clean">
         <delete dir="bin-annotations"/>
+    	<delete file="sqlannotation-annotations.jar"/>
     </target>
 	
-	<target depends="init" name="build-project">
+	<target name="build-project">
+		<mkdir dir="bin-annotations"/>
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin-annotations" source="${source}" target="${target}">
             <src path="src/com/annotatedsql/annotation"/>
             <classpath refid="AnnotatedSQLProcessor.classpath"/>
         </javac>
@@ -31,7 +26,7 @@
     
     <target name="build" depends="clean, build-project">
         <!--buildnumber file="api-build.number"/-->
-        <jar destfile="sqlannotation-annotations.jar" basedir="bin"></jar>
+        <jar destfile="sqlannotation-annotations.jar" basedir="bin-annotations"></jar>
     	<delete dir="bin-annotations"/>
 	</target>
 </project>
