@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AnnotatedSQL
 Bundle-SymbolicName: com.annotatedsql.AnnotatedSQL;singleton:=true
-Bundle-Version: 1.5.0
+Bundle-Version: 1.5.1
 Bundle-ClassPath: lib/codemodel-2.4.1.jar,
  lib/freemarker.jar,
  AnnotatedSQLProcessor.jar
