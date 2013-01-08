@@ -39,7 +39,8 @@ public class ClassPathContainerImpl implements IClasspathContainer {
 				entryList.add(JavaCore.newLibraryEntry(
 							new Path(file), 
 							null, 
-							null));
+							null, 
+							true));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

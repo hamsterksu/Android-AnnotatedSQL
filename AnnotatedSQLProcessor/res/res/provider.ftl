@@ -288,11 +288,12 @@ public class ${className} extends ContentProvider{
 	</#list>
 	
 	public static void notifyUri(ContentResolver cr, Uri uri){
+		cr.notifyChange(uri, null);
 		switch(matcher.match(uri)){
 			<#list entities as e>
 			<#if (e.hasAltNotify)>
 			case MATCH_${getMathcName(e.path)}:{
-				cr.notifyChange(uri, null);
+				
 				<#list e.altNotify as alt>
 					<#if e.item && alt.itemizedAltNotify>
 				cr.notifyChange(getContentUri("${alt.value}", uri.getLastPathSegment()), null);
@@ -304,8 +305,6 @@ public class ${className} extends ContentProvider{
 			}
 			</#if>
 			</#list> 
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
 		}
 	}
 	
