@@ -55,7 +55,7 @@ public class ClassPathContainerImpl implements IClasspathContainer {
 
 	@Override
 	public int getKind() {
-		return IClasspathEntry.CPE_CONTAINER;
+		return IClasspathEntry.CPE_LIBRARY;
 	}
 
 	@Override

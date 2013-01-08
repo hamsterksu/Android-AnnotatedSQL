@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/AnnotatedSQLFeature_1.5.1.jar" id="AnnotatedSQLFeature" version="1.5.1">
+   <feature url="features/AnnotatedSQLFeature_1.5.2.jar" id="AnnotatedSQLFeature" version="1.5.2">
       <category name="com.annotatedsql"/>
    </feature>
    <category-def name="com.annotatedsql" label="com.annotatedsql"/>
