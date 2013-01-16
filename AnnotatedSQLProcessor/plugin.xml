@@ -67,7 +67,7 @@ public static interface ${class_name}{
 	@From(${from_table}.TABLE_NAME)
 	String ${from_table_alias} = "${from_alias}";
 	
-	@Join(joinTable=${join_table}, joinColumn=${join_coumn}, onTable=${from_table_alias}, onColumn=${on_column})
+	@Join(joinTable=${join_table}, joinColumn=${join_coumn}, onTableAlias=${from_table_alias}, onColumn=${on_column})
 	String ${join_table_alias} = "${join_alias}";	
 }
 	        </pattern>
