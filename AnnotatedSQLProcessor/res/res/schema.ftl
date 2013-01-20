@@ -29,7 +29,7 @@ public class ${className}{
 	</#list>
 	//queries	
 	<#list queries as q>
-	public static final String SQL_QUERY_${q.queryName?upper_case} = "${q.sql}";
+	public static final String SQL_QUERY_${q.viewName?upper_case} = "${q.sql}";
 	 
 	</#list>
 	

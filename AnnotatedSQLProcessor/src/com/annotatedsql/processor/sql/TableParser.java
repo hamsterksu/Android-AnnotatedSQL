@@ -1,24 +1,30 @@
 package com.annotatedsql.processor.sql;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 
 import com.annotatedsql.AnnotationParsingException;
+import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.Column;
 import com.annotatedsql.annotation.sql.PrimaryKey;
 import com.annotatedsql.annotation.sql.Table;
+import com.annotatedsql.ftl.TableColumns;
 import com.annotatedsql.processor.sql.ColumnProcessor.ColumnMeta;
 
-public class TableProcessor {
+public class TableParser{
 
-	/**
-	 * @throws AnnotationParsingException
-	 */
-	public static TableInfo create(Element c){
-		TableInfo tableInfo = new TableInfo();
+	private final Element c;
+	private final ParserEnv parserEnv;
+	
+	public TableParser(Element c, ParserEnv parserEnv){
+		this.c = c;
+		this.parserEnv = parserEnv;
+	}
+	
+	public TableResult parse() {
+		TableColumns tableColumns = new TableColumns(false); 
 		
 		Table table = c.getAnnotation(Table.class);
 		String name = table.value();
@@ -34,8 +40,9 @@ public class TableProcessor {
 			Column column = f.getAnnotation(Column.class);
 			if(column == null)
 				continue;
+			
 			ColumnMeta meta = ColumnProcessor.create((VariableElement)f);
-			tableInfo.addColumn(meta.name);
+			tableColumns.add(f.getSimpleName().toString(), meta.name);
 			hasPrimaryKey |= meta.isPrimary;
 			sql.append(',').append(meta.sql);
 			columnCount++;
@@ -53,10 +60,10 @@ public class TableProcessor {
 		sql.setCharAt(pos, '(');
         sql.append(')');
         
-        tableInfo.setSql(sql.toString());
-        return tableInfo;
+        parserEnv.addTable(name, tableColumns);
+        return new TableResult(sql.toString(), tableColumns.toColumnsList());
 	}
-	
+
 	private static void proceedPk(final StringBuilder sql, String[] columns){
 		sql.append(", PRIMARY KEY(");
 		for (final String column : columns) {
@@ -64,26 +71,5 @@ public class TableProcessor {
 		}
 		sql.setLength(sql.length() - 1);
 		sql.append(")");
-	}
-	
-	static class TableInfo{
-		String sql;
-		List<String> columns = new ArrayList<String>();
-		
-		public void setSql(String sql) {
-			this.sql = sql;
-		}
-		
-		public void addColumn(String column){
-			columns.add(column);
-		}
-		
-		public String getSql() {
-			return sql;
-		}
-		
-		public List<String> getColumns() {
-			return columns;
-		}
 	}
 }

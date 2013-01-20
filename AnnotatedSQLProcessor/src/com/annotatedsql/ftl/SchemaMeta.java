@@ -7,6 +7,7 @@ public class SchemaMeta {
 
 	private final String className;
 	private String pkgName;
+	private final String defineClassName;
 	
 	private String dbName;
 	private int dbVersion;
@@ -14,11 +15,12 @@ public class SchemaMeta {
 	private final List<TableMeta> tables = new ArrayList<TableMeta>();
 	private final List<IndexMeta> indexes = new ArrayList<IndexMeta>();
 	private final List<ViewMeta> views = new ArrayList<ViewMeta>();
-	private final List<QueryMeta> queries = new ArrayList<QueryMeta>();
+	private final List<ViewMeta> queries = new ArrayList<ViewMeta>();
 	
-	public SchemaMeta(String className) {
+	public SchemaMeta(String className, String defineClassName) {
 		super();
 		this.className = className;
+		this.defineClassName = defineClassName;
 	}
 	
 	public String getClassName() {
@@ -41,7 +43,7 @@ public class SchemaMeta {
 		indexes.add(indexMeta);
 	}
 	
-	public void addQuery(QueryMeta table){
+	public void addQuery(ViewMeta table){
 		queries.add(table);
 	}
 	
@@ -81,7 +83,11 @@ public class SchemaMeta {
 		return dbVersion;
 	}
 	
-	public List<QueryMeta> getQueries() {
+	public List<ViewMeta> getQueries() {
 		return queries;
+	}
+	
+	public String getDefineClassName() {
+		return defineClassName;
 	}
 }

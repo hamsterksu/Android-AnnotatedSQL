@@ -18,18 +18,16 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
 import com.annotatedsql.AnnotationParsingException;
+import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.Index;
 import com.annotatedsql.annotation.sql.RawQuery;
 import com.annotatedsql.annotation.sql.Schema;
 import com.annotatedsql.annotation.sql.SimpleView;
 import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.IndexMeta;
-import com.annotatedsql.ftl.QueryMeta;
 import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.TableMeta;
-import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.ProcessorLogger;
-import com.annotatedsql.processor.sql.TableProcessor.TableInfo;
 import com.annotatedsql.util.TextUtils;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -79,7 +77,7 @@ public class SQLProcessor extends AbstractProcessor {
 					logger.e("Schema name can't be empty", e);
 					return false;
 				}
-				schema = new SchemaMeta(schemaElement.className());
+				schema = new SchemaMeta(schemaElement.className(), e.getSimpleName().toString());
 				schema.setDbName(schemaElement.dbName());
 				schema.setDbVersion(schemaElement.dbVersion());
 				
@@ -93,15 +91,16 @@ public class SQLProcessor extends AbstractProcessor {
 			 return false;
 		}
 		
-		
+		ParserEnv parserEnv = new ParserEnv();
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
 			
 			logger.i("SQLProcessor table found: " + element.getSimpleName());
 			Table table = element.getAnnotation(Table.class);
-			TableInfo tableInfo = TableProcessor.create(element);
+			TableResult tableInfo = new TableParser(element, parserEnv).parse();
+			
 			tableColumns.put(table.value(), tableInfo.getColumns());
-			schema.addTable(new TableMeta(table.value(), tableInfo.sql));
+			schema.addTable(new TableMeta(table.value(), tableInfo.getSql()));
 		}
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Index.class)) {
@@ -113,31 +112,36 @@ public class SQLProcessor extends AbstractProcessor {
 		}
 		for(Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)){
 			logger.i("SQLProcessor simple view found: " + element.getSimpleName());
-			SimpleView view = element.getAnnotation(SimpleView.class);
-			String sql = SimpleViewProcessor.create(element, tableColumns);
-			schema.addView(new ViewMeta(view.value(), sql));
+			schema.addView(new SimpleViewParser(element, parserEnv).parse());
 		}
 		
 		for(Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)){
 			logger.i("SQLProcessor raw query found: " + element.getSimpleName());
-			RawQuery rawQuery = element.getAnnotation(RawQuery.class);
-			String sql = RawQueryProcessor.create(element, tableColumns);
-			schema.addQuery(new QueryMeta(rawQuery.value(), sql));
+			schema.addQuery(new RawQueryParser(element, parserEnv).parse());
 		}
 		if(schema.isEmpty()){
 			return false;
 		}
-		processTemplateForModel(schema);
+		processSchema(schema);
+		processSchemaExt(schema);
 		return true;
 	}
 
-	private void processTemplateForModel(SchemaMeta model) {
+	private void processSchema(SchemaMeta model) {
+		processTemplateForModel(model, "schema.ftl", null);
+	}
+	
+	private void processSchemaExt(SchemaMeta model) {
+		processTemplateForModel(model, "schema_extend.ftl", "2");
+	}
+	
+	private void processTemplateForModel(SchemaMeta model, String templateName, String postfix ) {
 		JavaFileObject file;
 		try {
-			file = processingEnv.getFiler().createSourceFile(model.getPkgName() + "." + model.getClassName());
+			file = processingEnv.getFiler().createSourceFile(model.getPkgName() + "." + model.getClassName() + (postfix  == null ? "" : postfix));
 			logger.i("Creating file:  " + model.getPkgName() + "." + file.getName());
 			Writer out = file.openWriter();
-			Template t = cfg.getTemplate("schema.ftl");
+			Template t = cfg.getTemplate(templateName);
 			t.process(model, out);
 			out.flush();
 			out.close();
