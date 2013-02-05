@@ -7,6 +7,10 @@ Android library for auto generating SQL schema and Content Provider by annotatio
 This project is an eclipse plugin to generate SQL schema and Content provider by annotations for Android project. It's annotation processor so it will not add some code to your final apk.
 It will work during compile process
 
+[eclipse update site][1]
+
+[github][2]
+
 To use this library in project you should install plugin to eclipse and add Annotation Library to build path(Project properties->Java Build Path->Libraries->Add Library).
 
 After that you should turn on annotation preprocessing for your project on the project properties screen and select plugin in factory path section.
@@ -154,3 +158,7 @@ Inherid provider:
             .....
         }
     
+
+
+  [1]: http://dl.dropbox.com/u/8604560/plugins/annotatedsql
+  [2]: https://github.com/hamsterksu/Android-AnnotatedSQL
