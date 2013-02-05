@@ -5,12 +5,14 @@ public class ColumnMeta {
 	public final String fullName;
 	public final String alias;
 	public final String variableName;
+	public final String variableAlias;
 
-	public ColumnMeta(String tableVariable, String fullName, String alias) {
+	public ColumnMeta(String variableName, String fullName, String alias, String variableAlias) {
 		super();
-		this.variableName = tableVariable;
+		this.variableName = variableName;
 		this.fullName = fullName;
 		this.alias = alias;
+		this.variableAlias = variableAlias;
 	}
 	
 
@@ -24,5 +26,9 @@ public class ColumnMeta {
 	
 	public String getVariableName() {
 		return variableName;
+	}
+	
+	public String getVariableAlias() {
+		return variableAlias;
 	}
 }

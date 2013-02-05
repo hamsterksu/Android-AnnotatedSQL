@@ -7,7 +7,8 @@ import com.annotatedsql.util.TextUtils;
 
 public class ProviderMeta {
 
-	private String className;
+	private final String storeClassName;
+	private final String className;
 	private String pkgName;
 	private String schemaClassName;
 	private String authority;
@@ -17,7 +18,8 @@ public class ProviderMeta {
 	private List<UriMeta> entities = new ArrayList<UriMeta>();
 	private List<String> imports = new ArrayList<String>();
 	
-	public ProviderMeta(String className){
+	public ProviderMeta(String storeClassName, String className){
+		this.storeClassName = storeClassName;
 		this.className = className;
 	}
 	
@@ -83,5 +85,9 @@ public class ProviderMeta {
 	
 	public boolean isSupportTransaction() {
 		return supportTransaction;
+	}
+	
+	public String getStoreClassName() {
+		return storeClassName;
 	}
 }

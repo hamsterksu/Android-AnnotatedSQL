@@ -5,6 +5,8 @@
  
 package ${pkgName};
 
+import ${pkgName}.${storeClassName}.*;
+
 public interface ${className}2 {
 	<#list views as view>
 
@@ -13,7 +15,7 @@ public interface ${className}2 {
 		
 		public static interface ${subTable.className} {
 			<#list subTable.columns as c>
-			String ${c.variableName} = "${c.alias}";
+			String ${c.variableName} = ${c.variableAlias};
 			</#list>
 		} 
 		</#list>
@@ -26,7 +28,7 @@ public interface ${className}2 {
 			
 		public static interface ${subTable.className} {
 			<#list subTable.columns as c>
-			String ${c.variableName} = "${c.alias}";
+			String ${c.variableName} = ${c.variableAlias};
 			</#list>
 		} 
 			</#list>

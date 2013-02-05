@@ -5,6 +5,7 @@ import java.util.List;
 
 public class SchemaMeta {
 
+	private final String storeClassName;
 	private final String className;
 	private String pkgName;
 	private final String defineClassName;
@@ -17,8 +18,9 @@ public class SchemaMeta {
 	private final List<ViewMeta> views = new ArrayList<ViewMeta>();
 	private final List<ViewMeta> queries = new ArrayList<ViewMeta>();
 	
-	public SchemaMeta(String className, String defineClassName) {
+	public SchemaMeta(String storeClassName, String className, String defineClassName) {
 		super();
+		this.storeClassName = storeClassName;
 		this.className = className;
 		this.defineClassName = defineClassName;
 	}
@@ -89,5 +91,9 @@ public class SchemaMeta {
 	
 	public String getDefineClassName() {
 		return defineClassName;
+	}
+	
+	public String getStoreClassName() {
+		return storeClassName;
 	}
 }

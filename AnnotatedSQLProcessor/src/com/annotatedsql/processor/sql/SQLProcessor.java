@@ -77,7 +77,7 @@ public class SQLProcessor extends AbstractProcessor {
 					logger.e("Schema name can't be empty", e);
 					return false;
 				}
-				schema = new SchemaMeta(schemaElement.className(), e.getSimpleName().toString());
+				schema = new SchemaMeta(e.getSimpleName().toString(), schemaElement.className(), e.getSimpleName().toString());
 				schema.setDbName(schemaElement.dbName());
 				schema.setDbVersion(schemaElement.dbVersion());
 				
@@ -91,7 +91,7 @@ public class SQLProcessor extends AbstractProcessor {
 			 return false;
 		}
 		
-		ParserEnv parserEnv = new ParserEnv();
+		ParserEnv parserEnv = new ParserEnv(schema.getStoreClassName());
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
 			

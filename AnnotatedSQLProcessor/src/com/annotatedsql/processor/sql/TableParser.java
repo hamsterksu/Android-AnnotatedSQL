@@ -24,10 +24,14 @@ public class TableParser{
 	}
 	
 	public TableResult parse() {
-		TableColumns tableColumns = new TableColumns(false); 
+		TableColumns tableColumns = new TableColumns(c.getSimpleName().toString(), false); 
 		
 		Table table = c.getAnnotation(Table.class);
 		String name = table.value();
+		
+		if(parserEnv.containsTable(name)){
+			throw new AnnotationParsingException(String.format("Table/View with name '%s' alredy defined", name), c);
+		}
 		
 		List<? extends Element> fields = c.getEnclosedElements();
 		final StringBuilder sql = new StringBuilder(fields.size() * 32);

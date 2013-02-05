@@ -20,11 +20,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
 
 public class ${className} extends ContentProvider{
 
@@ -132,15 +134,44 @@ public class ${className} extends ContentProvider{
 
 	
     @Override
-    public int bulkInsert(Uri uri, ContentValues[] values) {
-    	SQLiteDatabase sql = dbHelper.getWritableDatabase();
+    public int bulkInsert(Uri uri, ContentValues[] valuesAr) {
+    	final String table;
+		
+		switch(matcher.match(uri)){
+			<#list entities as e>
+			<#if !e.item && !e.onlyQuery>
+			case MATCH_${getMathcName(e.path)}:{
+				table = ${e.tableLink};
+				break;
+			}
+			</#if>
+			</#list> 
+			default:
+				throw new IllegalArgumentException("Unsupported uri " + uri);
+		}
+		SQLiteDatabase sql = dbHelper.getWritableDatabase();
 		sql.beginTransaction();
 		int count = 0;
 		try {
-			count = super.bulkInsert(uri, values);
+			InsertHelper ih = new InsertHelper(sql, table);
+			for (ContentValues values : valuesAr) {
+			<#list entities as e>
+				<@addInsertBeforeTrigger uri=e />
+			</#list>
+				ih.replace(values);
+				count++;
+			}
+
 			sql.setTransactionSuccessful();
+			<#list entities as e>
+				<@addInsertAfterTrigger uri=e />
+			</#list>
 		} finally {
 			sql.endTransaction();
+		}
+		
+		if (!ignoreNotify(uri)) {
+			notifyUri(contentResolver, uri);
 		}
     	return count;
     }
@@ -149,7 +180,7 @@ public class ${className} extends ContentProvider{
 	@Override
 	@SuppressWarnings("unused")
 	public Uri insert(Uri uri, ContentValues values) {
-		String table;
+		final String table;
 		
 		switch(matcher.match(uri)){
 			<#list entities as e>
@@ -179,7 +210,7 @@ public class ${className} extends ContentProvider{
 	@Override
 	@SuppressWarnings("unused")
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		String table;
+		final String table;
         String processedSelection = selection;
         
 		switch(matcher.match(uri)){
@@ -214,7 +245,7 @@ public class ${className} extends ContentProvider{
 	@Override
 	@SuppressWarnings("unused")
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		String table;
+		final String table;
         String processedSelection = selection;
         
 		switch(matcher.match(uri)){

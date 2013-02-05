@@ -23,6 +23,8 @@ public abstract class ViewTableColumnParser<T extends ParserResult, A extends An
 	private TableColumns tableColumns;
 	
 	protected final String aliasName;
+	protected final String aliasVariale;
+	
 	protected final boolean ignoreId;
 	protected final Element field;
 	protected final A annotation;
@@ -38,6 +40,7 @@ public abstract class ViewTableColumnParser<T extends ParserResult, A extends An
 		this.annotation = (A)f.getAnnotation(getAnnotationClass());
 		this.ignoreId = ignoreId;
 		this.aliasName = (String)((VariableElement)this.field).getConstantValue();
+		this.aliasVariale = this.field.getSimpleName().toString();
 		this.tableName = parseTableName();
 		this.tableColumns = parserEnv.getColumns(tableName);
 		checkAlias();
@@ -82,9 +85,24 @@ public abstract class ViewTableColumnParser<T extends ParserResult, A extends An
 	protected ColumnMeta getColumnName(String c) {
 		String variable = tableColumns.getVariable(c);
 		if(ignoreId && "_id".equals(c)){
-			return new ColumnMeta(variable, aliasName + "." + c, c);
+			final String variableAlias;
+			if(tableColumns.isView()){
+				variableAlias = String.format("\"%s_%s\"", aliasName, c);
+			}else{
+				variableAlias = parserEnv.getRootClass() + "." + tableColumns.getClassName() + "." + variable;
+			}
+			return new ColumnMeta(variable, aliasName + "." + c, c, variableAlias);
 		}else{
-			return new ColumnMeta(variable, aliasName + "." + c, aliasName + "_" + c);
+			final String variableAlias;
+			if(tableColumns.isView()){
+				variableAlias = String.format("\"%s_%s\"", aliasName, c); 
+			}else{
+				variableAlias = String.format("%s.%s.%s + \"_\" + %s.%s.%s", 
+						parserEnv.getRootClass(), parentParser.getClassName(), aliasVariale,
+						parserEnv.getRootClass(), tableColumns.getClassName(), variable);
+			}
+			return new ColumnMeta(variable, aliasName + "." + c, 
+					aliasName + "_" + c, variableAlias);
 		}
 	}
 	

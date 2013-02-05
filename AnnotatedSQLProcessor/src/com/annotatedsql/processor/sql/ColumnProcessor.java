@@ -7,6 +7,7 @@ import com.annotatedsql.annotation.sql.Autoincrement;
 import com.annotatedsql.annotation.sql.Column;
 import com.annotatedsql.annotation.sql.NotNull;
 import com.annotatedsql.annotation.sql.PrimaryKey;
+import com.annotatedsql.annotation.sql.Unique;
 import com.annotatedsql.util.TextUtils;
 
 public class ColumnProcessor {
@@ -27,6 +28,8 @@ public class ColumnProcessor {
 		boolean isAutoIncrement = f.getAnnotation(Autoincrement.class) != null;
 		boolean isNotNull = f.getAnnotation(NotNull.class) != null;
 		
+		Unique unique = f.getAnnotation(Unique.class);
+		
 		StringBuilder sql = new StringBuilder(" ");
 		sql.append(columnName).append(' ').append(column.type());
 		if(isPrimary){
@@ -39,6 +42,9 @@ public class ColumnProcessor {
 			sql.append(" NOT NULL");
 		}
 		
+		if(unique != null){
+			sql.append(" UNIQUE ON CONFLICT ").append(unique.type());
+		}
 		String defVal = column.defVal();
 		if(!TextUtils.isEmpty(defVal)){
 			sql.append(" DEFAULT (").append(defVal).append(")");

@@ -82,7 +82,7 @@ public class ProviderProcessor extends AbstractProcessor{
 					logger.e("Provider name can't be empty", e);
 					return false;
 				}
-				provider = new ProviderMeta(providerElement.name());
+				provider = new ProviderMeta(e.getSimpleName().toString(), providerElement.name());
 				PackageElement pkg = (PackageElement)e.getEnclosingElement();
 				provider.setPkgName(pkg.getQualifiedName().toString());
 				provider.setSchemaClassName(providerElement.schemaClass());

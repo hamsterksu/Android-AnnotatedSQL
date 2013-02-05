@@ -6,18 +6,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.annotatedsql.util.TextUtils;
-
 public class TableColumns implements Iterable<String>{
 
 	private final boolean isView;
+	
+	private final String className;
 	
 	private final Map<String, String> column2variable = new LinkedHashMap<String, String>();
 	
 	private final Map<String, String> variable2columns = new LinkedHashMap<String, String>();
 	
-	public TableColumns(boolean isView){
+	public TableColumns(String className, boolean isView){
 		this.isView = isView;
+		this.className = className;
 	}
 	
 	public void add(String variable, String column){
@@ -59,5 +60,9 @@ public class TableColumns implements Iterable<String>{
 	
 	public boolean isView() {
 		return isView;
+	}
+	
+	public String getClassName() {
+		return className;
 	}
 }

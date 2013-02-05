@@ -7,7 +7,13 @@ import com.annotatedsql.ftl.TableColumns;
 
 public class ParserEnv {
 	
+	private final String rootClass;
+	
 	private Map<String, TableColumns> tableColumns = new HashMap<String, TableColumns>();
+	
+	public ParserEnv(String rootClass){
+		this.rootClass = rootClass;
+	}
 	
 	public boolean isColumnExists(String table, String column){
 		TableColumns columns = tableColumns.get(table);
@@ -24,5 +30,9 @@ public class ParserEnv {
 
 	public boolean containsTable(String name) {
 		return tableColumns.containsKey(name);
+	}
+	
+	public String getRootClass() {
+		return rootClass;
 	}
 }

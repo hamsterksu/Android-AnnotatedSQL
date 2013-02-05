@@ -2,7 +2,7 @@
 <feature
       id="AnnotatedSQLFeature"
       label="AnnotatedSQLFeature"
-      version="1.6.4">
+      version="1.7.0">
 
    <description>
       AnnotatedSQL: android library to autogenerate sql schema and content provider.
@@ -36,6 +36,6 @@
          id="com.annotatedsql.AnnotatedSQL"
          download-size="0"
          install-size="0"
-         version="1.6.4"/>
+         version="1.7.0"/>
 
 </feature>

@@ -88,7 +88,7 @@ public class SimpleViewParser{
 	}
 	
 	protected void addColumns2Env(){
-		TableColumns columns = new TableColumns(true);
+		TableColumns columns = new TableColumns(f.getSimpleName().toString(), true);
 		for(ViewTableInfo t : viewMeta.getTables()){
 			for(ColumnMeta c : t.getColumns()){
 				columns.add(t.getName(), c.variableName, c.alias);
@@ -124,6 +124,10 @@ public class SimpleViewParser{
 	
 	public void regAlias(String aliasName, Element e) {
 		aliases.put(aliasName, e);
+	}
+
+	public String getClassName() {
+		return f.getSimpleName().toString();
 	}
 
 }
