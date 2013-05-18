@@ -161,7 +161,7 @@ public class ${className} extends ContentProvider{
 				ih.replace(values);
 				count++;
 			}
-
+			ih.close();
 			sql.setTransactionSuccessful();
 			<#list entities as e>
 				<@addInsertAfterTrigger uri=e />
