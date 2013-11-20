@@ -49,6 +49,7 @@ public class AnnotatedSqlPlugin implements Plugin<Project>  {
         }
 
         project.configurations.create('annotatedsql').with {
+			extendsFrom project.configurations.compile
             visible = false
             transitive = true
             description = 'The compile time libraries to be used for annotated sql.'
