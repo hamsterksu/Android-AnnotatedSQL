@@ -72,7 +72,11 @@ subprojects {
 					   developer {
 						   id 'hamsterksu'
 						   name 'Gennadiy Dubina'
-						   email 'hamsterksu@gmail.com'
+					   }
+					   
+					   developer {
+						   id 'TheHiddenDuck'
+						   name ' Alexander Osmanov'
 					   }
 				   }
 			   }
