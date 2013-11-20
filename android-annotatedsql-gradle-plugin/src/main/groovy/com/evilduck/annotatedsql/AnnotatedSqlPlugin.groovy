@@ -56,10 +56,8 @@ public class AnnotatedSqlPlugin implements Plugin<Project>  {
         }
 
         project.dependencies {
-            apt project.fileTree(dir: "${project.projectDir}/libs-apt", include: '*.jar')
-            annotatedsql project.files("${project.projectDir}/libs/sqlannotation-annotations.jar")
-
-            compile project.configurations.annotatedsql
+            apt "com.github.hamsterksu:android-annotatedsql-processor:1.7.+"
+            annotatedsql "com.github.hamsterksu:android-annotatedsql-api:1.7.+"
         }
     }
 
