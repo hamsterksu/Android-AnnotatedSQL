@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':android-annotatedsql-api')
+	compile 'org.freemarker:freemarker:2.3.20'
+	compile 'com.sun.codemodel:codemodel:2.6'
+}
