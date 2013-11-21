@@ -3,3 +3,9 @@ dependencies {
 	compile 'log4j:log4j:1.2.17'
 	compile 'org.freemarker:freemarker:2.3.20'
 }
+
+jar {
+	from ('./') {
+		include 'META-INF/services/javax.annotation.processing.Processor'
+	}
+}

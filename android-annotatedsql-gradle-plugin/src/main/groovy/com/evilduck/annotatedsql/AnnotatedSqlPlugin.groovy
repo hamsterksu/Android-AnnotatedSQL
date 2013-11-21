@@ -66,6 +66,7 @@ public class AnnotatedSqlPlugin implements Plugin<Project>  {
             def aptOutput = project.file("$project.buildDir/source/$extension.aptOutputDir/$variant.dirName")
 
             variant.javaCompile.doFirst {
+				println "*** annotatedsql *** try to compile ${variant.name}"
                 aptOutput.mkdirs()
 
                 variant.javaCompile.options.compilerArgs += [
