@@ -27,10 +27,10 @@ class AndroidAnnotationsLibrary extends AptLibrary  {
         groupId = 'com.googlecode.androidannotations'
         artifactIdApt = 'androidannotations'
         artifactIdLibrary = 'androidannotations-api'
-    }
 
-    void appendAptArgs(Collection<String> args, variant) {
-        args.add("-AandroidManifestFile=${variant.processResources.manifestFile}")
+        args = { variant ->
+            arg "-AandroidManifestFile", "${variant.processResources.manifestFile}"
+        }
     }
 
     void groupId(String groupId) {
@@ -44,5 +44,10 @@ class AndroidAnnotationsLibrary extends AptLibrary  {
     void artifactIdLibrary(String artifactIdLibrary) {
         throw new UnsupportedOperationException("artifactIdLibrary cannot be changed")
     }
+
+    public void customArgs(def args) {
+        throw new UnsupportedOperationException("custom args cannot be changed")
+    }
+
 
 }

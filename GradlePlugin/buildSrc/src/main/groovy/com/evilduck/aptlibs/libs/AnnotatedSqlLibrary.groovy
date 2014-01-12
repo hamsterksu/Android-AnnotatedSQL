@@ -41,4 +41,8 @@ class AnnotatedSqlLibrary extends AptLibrary  {
         throw new UnsupportedOperationException("artifactIdLibrary cannot be changed")
     }
 
+    public void customArgs(def args) {
+        throw new UnsupportedOperationException("custom args cannot be changed")
+    }
+
 }

@@ -18,9 +18,10 @@
  */
 package com.evilduck.aptlibs.libs
 
-class AptLibrary  {
+import com.evilduck.aptlibs.ArgConfig
 
-    String variant
+class AptLibrary {
+
     String name
     boolean enabled = true
     List<String> processors = new ArrayList<String>()
@@ -30,11 +31,17 @@ class AptLibrary  {
     String artifactIdLibrary
     String version
 
+    def args;
+
     public AptLibrary() {
     }
 
     public AptLibrary(String name) {
         this.name = name
+    }
+
+    public void customArgs(def args) {
+        this.args = args
     }
 
     public void enabled(boolean enabled) {
@@ -70,6 +77,12 @@ class AptLibrary  {
     }
 
     void appendAptArgs(Collection<String> args, variant) {
+        if (this.args != null) {
+            ArgConfig config = new ArgConfig()
+            this.args.delegate = config
+            this.args(variant)
+            args.addAll(config.args)
+        }
     }
 
 }
