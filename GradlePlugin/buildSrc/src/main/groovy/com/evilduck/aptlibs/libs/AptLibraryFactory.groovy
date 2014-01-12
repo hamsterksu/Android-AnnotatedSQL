@@ -16,10 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.evilduck.annotatedsql
+package com.evilduck.aptlibs.libs
 
-class AnnotatedSqlExtension  {
+import org.gradle.api.NamedDomainObjectFactory;
 
-    public String aptOutputDir
+class AptLibraryFactory implements NamedDomainObjectFactory<AptLibrary> {
+
+    @Override
+    public AptLibrary create(String name) {
+        return new AptLibrary(name);
+    }
 
 }
