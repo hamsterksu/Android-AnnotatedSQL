@@ -16,10 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.evilduck.annotatedsql
+package com.evilduck.aptlibs
 
-class AnnotatedSqlExtension  {
+class ArgConfig  {
 
-    public String aptOutputDir
+    List<String> args = new ArrayList<>()
+
+    public ArgConfig() {
+    }
+
+    void arg(String name, String value) {
+        args += "$name=$value"
+    }
 
 }
