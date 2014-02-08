@@ -107,7 +107,7 @@ public class ${className} extends ContentProvider{
 				Selection where = appendSelection(selection, selectionArgs, "${e.selectColumn} = ?", new String[]{uri.getLastPathSegment()});
 				selection = where.where;
 				selectionArgs = where.whereArgs;
-				<elseif e.where>
+				<#elseif e.where>
 				Selection where = appendSelection(selection, selectionArgs, "${e.queryWhere}", new String[]{${e.whereArgs}});
                 selection = where.where;
                 selectionArgs = where.whereArgs;
