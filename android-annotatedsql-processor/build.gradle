@@ -1,7 +1,8 @@
 dependencies {
     compile project(':android-annotatedsql-api')
-	compile 'log4j:log4j:1.2.17'
-	compile 'org.freemarker:freemarker:2.3.20'
+    compile 'log4j:log4j:1.2.17'
+    compile 'org.freemarker:freemarker:2.3.20'
+    compile 'com.google.guava:guava:16.0.1'
 }
 
 jar {

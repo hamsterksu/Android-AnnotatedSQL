@@ -1,13 +1,13 @@
 package com.annotatedsql.processor.sql.view;
 
-import java.util.List;
-
-import javax.lang.model.element.Element;
-
 import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.From;
 import com.annotatedsql.ftl.ColumnMeta;
 import com.annotatedsql.processor.sql.SimpleViewParser;
+
+import java.util.List;
+
+import javax.lang.model.element.Element;
 
 public class FromParser extends ViewTableColumnParser<FromResult, From>{
 

@@ -1,9 +1,9 @@
 package com.annotatedsql.processor.sql.view;
 
-import java.util.List;
-
 import com.annotatedsql.ParserResult;
 import com.annotatedsql.ftl.ColumnMeta;
+
+import java.util.List;
 
 public class FromResult extends ParserResult{
 

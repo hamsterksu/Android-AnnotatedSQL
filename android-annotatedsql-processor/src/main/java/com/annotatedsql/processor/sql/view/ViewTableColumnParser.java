@@ -1,13 +1,5 @@
 package com.annotatedsql.processor.sql.view;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
-
 import com.annotatedsql.AnnotationParser;
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.ParserEnv;
@@ -17,6 +9,14 @@ import com.annotatedsql.annotation.sql.IgnoreColumns;
 import com.annotatedsql.ftl.ColumnMeta;
 import com.annotatedsql.ftl.TableColumns;
 import com.annotatedsql.processor.sql.SimpleViewParser;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.VariableElement;
 
 public abstract class ViewTableColumnParser<T extends ParserResult, A extends Annotation> implements AnnotationParser{
 

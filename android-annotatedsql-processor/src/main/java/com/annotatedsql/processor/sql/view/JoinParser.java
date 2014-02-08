@@ -1,13 +1,14 @@
 package com.annotatedsql.processor.sql.view;
 
-import java.util.List;
-
-import javax.lang.model.element.Element;
-
 import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.Join;
 import com.annotatedsql.ftl.ColumnMeta;
 import com.annotatedsql.processor.sql.SimpleViewParser;
+import com.annotatedsql.util.Where;
+
+import java.util.List;
+
+import javax.lang.model.element.Element;
 
 public class JoinParser extends ViewTableColumnParser<FromResult, Join>{
 
@@ -38,7 +39,11 @@ public class JoinParser extends ViewTableColumnParser<FromResult, Join>{
 		sql.append(annotation.joinTable()).append(" AS ").append(aliasName)
 		.append(" ON ").append(aliasName).append('.').append(annotation.joinColumn())
 		.append(" = ").append(annotation.onTableAlias()).append('.').append(annotation.onColumn());
-		
+
+        Where where = parserEnv.getTableWhere(tableName);
+        if(where != null){
+            sql.append(" and ").append(where.copy(aliasName).getAsCondition());
+        }
 		List<ColumnMeta> columns = parseColumns();
 		return new FromResult(aliasName, sql.toString(), toSqlSelect(columns), columns);
 	}

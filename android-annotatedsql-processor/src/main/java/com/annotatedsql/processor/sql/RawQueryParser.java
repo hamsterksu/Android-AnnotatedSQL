@@ -1,10 +1,5 @@
 package com.annotatedsql.processor.sql;
 
-import java.util.List;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
-
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.From;
@@ -16,6 +11,11 @@ import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.sql.view.FromParser;
 import com.annotatedsql.processor.sql.view.JoinParser;
 import com.annotatedsql.processor.sql.view.RawJoinParser;
+
+import java.util.List;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.VariableElement;
 
 public class RawQueryParser extends SimpleViewParser{
 	

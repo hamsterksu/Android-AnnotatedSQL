@@ -99,8 +99,18 @@ public class ${className} extends ContentProvider{
 				return c;  
 			<#else>
 				query.setTables(${e.tableLink});
-				<#if e.item>
-				query.appendWhere("${e.selectColumn} = " + uri.getLastPathSegment());
+				<#if e.item && e.where >
+				Selection where = appendSelection(selection, selectionArgs, "${e.selectColumn} = ? and ${e.queryWhere}", new String[]{uri.getLastPathSegment(), ${e.whereArgs}});
+                selection = where.where;
+                selectionArgs = where.whereArgs;
+				<#elseif e.item>
+				Selection where = appendSelection(selection, selectionArgs, "${e.selectColumn} = ?", new String[]{uri.getLastPathSegment()});
+				selection = where.where;
+				selectionArgs = where.whereArgs;
+				<elseif e.where>
+				Selection where = appendSelection(selection, selectionArgs, "${e.queryWhere}", new String[]{${e.whereArgs}});
+                selection = where.where;
+                selectionArgs = where.whereArgs;
 				</#if>
 				break;
 			</#if>
@@ -415,4 +425,46 @@ public class ${className} extends ContentProvider{
 	}
 	</#if>
 
+    private static Selection appendSelection(String selection1, String[] selectionArgs1, String selection2, String[] selectionArgs2){
+        StringBuffer where = new StringBuffer(128);
+        if(!TextUtils.isEmpty(selection1)){
+            where.append(selection1);
+        }
+
+        if(!TextUtils.isEmpty(selection2)){
+            boolean needBrackets = where.length() != 0;
+            if(needBrackets){
+                where.insert(0, "(")
+                      .append(") and (");
+            }
+            where.append(selection2);
+            if(needBrackets){
+                where.append(")");
+            }
+        }
+
+        int size = (selectionArgs1 == null ? 0 : selectionArgs1.length) + (selectionArgs2 == null ? 0 : selectionArgs2.length);
+        int offset = 0;
+        String[] whereArgs = new String[size];
+        if(selectionArgs1 != null){
+            System.arraycopy(selectionArgs1, 0, whereArgs, 0, selectionArgs1.length);
+            offset = selectionArgs1.length;
+        }
+
+        if(selectionArgs2 != null){
+            System.arraycopy(selectionArgs2, 0, whereArgs, offset, selectionArgs2.length);
+        }
+
+        return new Selection(where.toString(), whereArgs);
+    }
+
+    private static class Selection{
+        String where;
+        String[] whereArgs;
+
+        private Selection(String where, String[] whereArgs) {
+            this.where = where;
+            this.whereArgs = whereArgs;
+        }
+    }
 }

@@ -1,15 +1,15 @@
 package com.annotatedsql.processor.sql.view;
 
-import java.util.List;
-
-import javax.lang.model.element.Element;
-
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.RawJoin;
 import com.annotatedsql.ftl.ColumnMeta;
 import com.annotatedsql.processor.sql.SimpleViewParser;
 import com.annotatedsql.util.TextUtils;
+
+import java.util.List;
+
+import javax.lang.model.element.Element;
 
 public class RawJoinParser extends ViewTableColumnParser<FromResult, RawJoin> {
 

@@ -1,10 +1,5 @@
 package com.annotatedsql.processor.sql;
 
-import java.util.HashMap;
-import java.util.List;
-
-import javax.lang.model.element.Element;
-
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.sql.From;
@@ -19,6 +14,12 @@ import com.annotatedsql.processor.sql.view.FromParser;
 import com.annotatedsql.processor.sql.view.FromResult;
 import com.annotatedsql.processor.sql.view.JoinParser;
 import com.annotatedsql.processor.sql.view.RawJoinParser;
+import com.annotatedsql.util.Where;
+
+import java.util.HashMap;
+import java.util.List;
+
+import javax.lang.model.element.Element;
 
 public class SimpleViewParser{
 
@@ -54,13 +55,14 @@ public class SimpleViewParser{
 		final int startSqlPos = sql.length();
 
 		From from = null;
+        FromResult fromResult = null;
 		for (Element f : fields) {
 			From tmpFrom = f.getAnnotation(From.class);
 			if (tmpFrom != null){
 				if(from != null){
-					throw new AnnotationParsingException("Dublicate @From annotation", f);
+					throw new AnnotationParsingException("Duplicate @From annotation", f);
 				}
-				handleFromResult(new FromParser(parserEnv, this, f).parse(), true, startSqlPos);
+				handleFromResult(fromResult = new FromParser(parserEnv, this, f).parse(), true, startSqlPos);
 				from = tmpFrom;
 			}else{
 				Join join = f.getAnnotation(Join.class);
@@ -81,7 +83,10 @@ public class SimpleViewParser{
 		}
 		sql.insert(startSqlPos, select.toString());
 		//sql.setCharAt(startSqlPos, ' ');
-		
+		Where where = parserEnv.getTableWhere(from.value());
+        if(where != null){
+            sql.append(" where ").append(where.copy(fromResult.getAliasName()).getAsCondition());
+        }
 		viewMeta.setSql(sql.toString());
 		addColumns2Env();
 		return viewMeta;

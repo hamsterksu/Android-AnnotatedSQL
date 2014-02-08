@@ -1,1 +1,1 @@
-include 'android-annotatedsql-api', 'android-annotatedsql-processor', 'android-annotatedsql-gradle-plugin'
+include 'android-annotatedsql-api', 'android-annotatedsql-processor'

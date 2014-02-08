@@ -1,10 +1,20 @@
 package com.annotatedsql.processor.sql;
 
+import com.annotatedsql.AnnotationParsingException;
+import com.annotatedsql.ParserEnv;
+import com.annotatedsql.annotation.sql.RawQuery;
+import com.annotatedsql.annotation.sql.Schema;
+import com.annotatedsql.annotation.sql.SimpleView;
+import com.annotatedsql.annotation.sql.Table;
+import com.annotatedsql.ftl.IndexMeta;
+import com.annotatedsql.ftl.SchemaMeta;
+import com.annotatedsql.ftl.TableMeta;
+import com.annotatedsql.processor.ProcessorLogger;
+import com.annotatedsql.util.TextUtils;
+
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -17,19 +27,6 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
-import com.annotatedsql.AnnotationParsingException;
-import com.annotatedsql.ParserEnv;
-import com.annotatedsql.annotation.sql.Index;
-import com.annotatedsql.annotation.sql.RawQuery;
-import com.annotatedsql.annotation.sql.Schema;
-import com.annotatedsql.annotation.sql.SimpleView;
-import com.annotatedsql.annotation.sql.Table;
-import com.annotatedsql.ftl.IndexMeta;
-import com.annotatedsql.ftl.SchemaMeta;
-import com.annotatedsql.ftl.TableMeta;
-import com.annotatedsql.processor.ProcessorLogger;
-import com.annotatedsql.util.TextUtils;
-
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -41,7 +38,6 @@ public class SQLProcessor extends AbstractProcessor {
 
 	private ProcessorLogger logger;
 	private Configuration cfg = new Configuration();
-	private Map<String, List<String>> tableColumns = new HashMap<String, List<String>>();
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -94,22 +90,23 @@ public class SQLProcessor extends AbstractProcessor {
 		ParserEnv parserEnv = new ParserEnv(schema.getStoreClassName());
 		
 		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
-			
+			if(!(element instanceof TypeElement))
+                continue;
 			logger.i("SQLProcessor table found: " + element.getSimpleName());
+            TypeElement typeElement = (TypeElement)element;
 			Table table = element.getAnnotation(Table.class);
-			TableResult tableInfo = new TableParser(element, parserEnv).parse();
-			
-			tableColumns.put(table.value(), tableInfo.getColumns());
+			TableResult tableInfo = new TableParser(typeElement, parserEnv, logger).parse();
+
 			schema.addTable(new TableMeta(table.value(), tableInfo.getSql()));
+
+            List<IndexMeta> indexes = TableParser.proceedIndexes(typeElement);
+            if(indexes != null){
+                for(IndexMeta i : indexes){
+                    schema.addIndex(i);
+                }
+            }
 		}
-		
-		for (Element element : roundEnv.getElementsAnnotatedWith(Index.class)) {
-			
-			logger.i("SQLProcessor index found: " + element.getSimpleName());
-			Index index = element.getAnnotation(Index.class);
-			String sql = IndexProcessor.create(element);
-			schema.addIndex(new IndexMeta(index.name(), sql));
-		}
+
 		for(Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)){
 			logger.i("SQLProcessor simple view found: " + element.getSimpleName());
 			schema.addView(new SimpleViewParser(element, parserEnv).parse());

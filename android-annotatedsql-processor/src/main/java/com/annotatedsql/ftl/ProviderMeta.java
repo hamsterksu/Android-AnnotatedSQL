@@ -1,9 +1,9 @@
 package com.annotatedsql.ftl;
 
+import com.annotatedsql.util.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.annotatedsql.util.TextUtils;
 
 public class ProviderMeta {
 

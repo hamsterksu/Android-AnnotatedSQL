@@ -1,7 +1,5 @@
 package com.annotatedsql.processor.sql;
 
-import javax.lang.model.element.VariableElement;
-
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.Autoincrement;
 import com.annotatedsql.annotation.sql.Column;
@@ -9,6 +7,8 @@ import com.annotatedsql.annotation.sql.NotNull;
 import com.annotatedsql.annotation.sql.PrimaryKey;
 import com.annotatedsql.annotation.sql.Unique;
 import com.annotatedsql.util.TextUtils;
+
+import javax.lang.model.element.VariableElement;
 
 public class ColumnProcessor {
 
