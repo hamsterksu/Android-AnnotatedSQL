@@ -100,17 +100,14 @@ public class ${className} extends ContentProvider{
 			<#else>
 				query.setTables(${e.tableLink});
 				<#if e.item && e.where >
-				Selection where = appendSelection(selection, selectionArgs, "${e.selectColumn} = ? and ${e.queryWhere}", new String[]{uri.getLastPathSegment(), ${e.whereArgs}});
-                selection = where.where;
-                selectionArgs = where.whereArgs;
+                selection = concatenateWhere(selection, "${e.selectColumn} = ? and ${e.queryWhere}");
+                selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment(), ${e.whereArgs}});
 				<#elseif e.item>
-				Selection where = appendSelection(selection, selectionArgs, "${e.selectColumn} = ?", new String[]{uri.getLastPathSegment()});
-				selection = where.where;
-				selectionArgs = where.whereArgs;
+				selection = concatenateWhere(selection, "${e.selectColumn} = ?");
+				selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment()});
 				<#elseif e.where>
-				Selection where = appendSelection(selection, selectionArgs, "${e.queryWhere}", new String[]{${e.whereArgs}});
-                selection = where.where;
-                selectionArgs = where.whereArgs;
+				selection = concatenateWhere(selection, "${e.queryWhere}");
+				selectionArgs = appendSelectionArgs(selectionArgs, new String[]{${e.whereArgs}});
 				</#if>
 				break;
 			</#if>
@@ -425,46 +422,35 @@ public class ${className} extends ContentProvider{
 	}
 	</#if>
 
-    private static Selection appendSelection(String selection1, String[] selectionArgs1, String selection2, String[] selectionArgs2){
-        StringBuffer where = new StringBuffer(128);
-        if(!TextUtils.isEmpty(selection1)){
-            where.append(selection1);
+    /**
+     * Concatenates two SQL WHERE clauses, handling empty or null values.
+     */
+    public static String concatenateWhere(String a, String b) {
+        if (TextUtils.isEmpty(a)) {
+            return b;
+        }
+        if (TextUtils.isEmpty(b)) {
+            return a;
         }
 
-        if(!TextUtils.isEmpty(selection2)){
-            boolean needBrackets = where.length() != 0;
-            if(needBrackets){
-                where.insert(0, "(")
-                      .append(") and (");
-            }
-            where.append(selection2);
-            if(needBrackets){
-                where.append(")");
-            }
-        }
-
-        int size = (selectionArgs1 == null ? 0 : selectionArgs1.length) + (selectionArgs2 == null ? 0 : selectionArgs2.length);
-        int offset = 0;
-        String[] whereArgs = new String[size];
-        if(selectionArgs1 != null){
-            System.arraycopy(selectionArgs1, 0, whereArgs, 0, selectionArgs1.length);
-            offset = selectionArgs1.length;
-        }
-
-        if(selectionArgs2 != null){
-            System.arraycopy(selectionArgs2, 0, whereArgs, offset, selectionArgs2.length);
-        }
-
-        return new Selection(where.toString(), whereArgs);
+        return "(" + a + ") AND (" + b + ")";
     }
 
-    private static class Selection{
-        String where;
-        String[] whereArgs;
-
-        private Selection(String where, String[] whereArgs) {
-            this.where = where;
-            this.whereArgs = whereArgs;
+    /**
+     * Appends one set of selection args to another. This is useful when adding a selection
+     * argument to a user provided set.
+     */
+    public static String[] appendSelectionArgs(String[] originalValues, String[] newValues) {
+        if (originalValues == null || originalValues.length == 0) {
+            return newValues;
         }
+        if (newValues == null || newValues.length == 0) {
+            return originalValues;
+        }
+        String[] result = new String[originalValues.length + newValues.length ];
+        System.arraycopy(originalValues, 0, result, 0, originalValues.length);
+        System.arraycopy(newValues, 0, result, originalValues.length, newValues.length);
+        return result;
     }
+
 }
