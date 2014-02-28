@@ -84,7 +84,7 @@ public class SimpleViewParser{
 		sql.insert(startSqlPos, select.toString());
 		//sql.setCharAt(startSqlPos, ' ');
 		Where where = parserEnv.getTableWhere(from.value());
-        if(where != null){
+        if(where != null && !where.isEmpty()){
             sql.append(" where ").append(where.copy(fromResult.getAliasName()).getAsCondition());
         }
 		viewMeta.setSql(sql.toString());

@@ -41,7 +41,7 @@ public class JoinParser extends ViewTableColumnParser<FromResult, Join>{
 		.append(" = ").append(annotation.onTableAlias()).append('.').append(annotation.onColumn());
 
         Where where = parserEnv.getTableWhere(tableName);
-        if(where != null){
+        if(where != null && !where.isEmpty()){
             sql.append(" and ").append(where.copy(aliasName).getAsCondition());
         }
 		List<ColumnMeta> columns = parseColumns();
