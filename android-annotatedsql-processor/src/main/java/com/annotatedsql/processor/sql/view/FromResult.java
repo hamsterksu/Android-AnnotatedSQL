@@ -13,11 +13,14 @@ public class FromResult extends ParserResult{
 	
 	private final List<ColumnMeta> columns;
 
-	public FromResult(String aliasName, String sql, String selectSql, List<ColumnMeta> columns) {
+    private final String excludeStaticWhere;
+
+    public FromResult(String aliasName, String sql, String selectSql, List<ColumnMeta> columns, String excludeStaticWhere) {
 		super(sql);
 		this.aliasName = aliasName;
 		this.selectSql = selectSql;
 		this.columns = columns;
+        this.excludeStaticWhere = excludeStaticWhere;
 	}
 	
 	public String getSelectSql() {
@@ -31,4 +34,8 @@ public class FromResult extends ParserResult{
 	public String getAliasName() {
 		return aliasName;
 	}
+
+    public String getExcludeStaticWhere() {
+        return excludeStaticWhere;
+    }
 }

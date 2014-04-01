@@ -1,5 +1,6 @@
 package com.annotatedsql.util;
 
+import com.annotatedsql.AnnotationParsingException;
 import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
@@ -56,6 +57,20 @@ public class Where {
 
     public boolean isEmpty() {
         return where.isEmpty();
+    }
+
+    public Where exclude(String excludeWhere) {
+        if(TextUtils.isEmpty(excludeWhere))
+            return this;
+        Where copyWhere = new Where(this.alias);
+        for(int i = 0; i < where.size(); i++){
+            WhereObject o = where.get(i);
+            WhereArgObject arg = whereArgs.get(i);
+            if(!excludeWhere.equals(o.field)){
+                copyWhere.add(o.field, arg.obj);
+            }
+        }
+        return copyWhere;
     }
 
     private class WhereObject {

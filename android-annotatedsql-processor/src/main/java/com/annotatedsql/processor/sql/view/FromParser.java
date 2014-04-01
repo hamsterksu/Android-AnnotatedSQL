@@ -9,7 +9,7 @@ import java.util.List;
 
 import javax.lang.model.element.Element;
 
-public class FromParser extends ViewTableColumnParser<FromResult, From>{
+public class FromParser extends ExcludeStaticWhereViewParser<FromResult, From>{
 
 	public FromParser(ParserEnv parserEnv, SimpleViewParser parentParser, Element f) {
 		super(parserEnv, parentParser, f, true);
@@ -18,7 +18,7 @@ public class FromParser extends ViewTableColumnParser<FromResult, From>{
 	@Override
 	public FromResult parse() {
 		List<ColumnMeta> columns = parseColumns();
-		return new FromResult(aliasName, " FROM " + tableName + " AS " + aliasName, toSqlSelect(columns), columns);
+		return new FromResult(aliasName, " FROM " + tableName + " AS " + aliasName, toSqlSelect(columns), columns, getExcludeStaticWhere());
 	}
 
 	@Override

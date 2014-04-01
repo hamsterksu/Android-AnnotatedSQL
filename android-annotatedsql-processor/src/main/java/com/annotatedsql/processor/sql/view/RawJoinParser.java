@@ -43,7 +43,7 @@ public class RawJoinParser extends ViewTableColumnParser<FromResult, RawJoin> {
 			.append(" ON ").append(annotation.onCondition());
 		
 		List<ColumnMeta> columns = parseColumns();
-		return new FromResult(aliasName, sql.toString(), toSqlSelect(columns), columns);
+		return new FromResult(aliasName, sql.toString(), toSqlSelect(columns), columns, null);
 	}
 
 	@Override
