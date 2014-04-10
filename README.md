@@ -8,7 +8,7 @@ Now available in maven central repo:
 	com.github.hamsterksu:android-annotatedsql-api:1.8.2
 	com.github.hamsterksu:android-annotatedsql-processor:1.8.2
 
-Very easy way to add annotation processors to your andorid project - just use aptlibs 
+Very easy way to add annotation processors to your andorid project - just use [aptlibs][3] 
 
 	buildscript {
 		repositories {
@@ -174,3 +174,4 @@ Inherid provider:
 
   [1]: http://dl.dropbox.com/u/8604560/plugins/annotatedsql
   [2]: https://github.com/hamsterksu/Android-AnnotatedSQL
+  [3]: https://github.com/hamsterksu/android-aptlibs-gradle-plugin
