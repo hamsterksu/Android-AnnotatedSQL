@@ -8,24 +8,32 @@ Now available in maven central repo:
 	com.github.hamsterksu:android-annotatedsql-api:1.8.2
 	com.github.hamsterksu:android-annotatedsql-processor:1.8.2
 
-This project is an eclipse plugin to generate SQL schema and Content provider by annotations for Android project. It's annotation processor so it will not add some code to your final apk.
-It will work during compile process
+Very easy way to add annotation processors to your andorid project - just use aptlibs 
 
-[eclipse update site][1]
+	buildscript {
+		repositories {
+			mavenCentral()
+		}
+		dependencies {
+			classpath 'com.github.hamsterksu:android-aptlibs-gradle-plugin:1.0.0'
+		}
+	}
+	
+	ext.asVersion = '1.8.2'
 
-[github][2]
+	dependencies {
+		compile "com.github.hamsterksu:android-annotatedsql-api:${asVersion}"
+	}
+	
+	aptlibs {
+		annotatedSql {
+			version "${asVersion}"
+		}
+	}
 
-To use this library in project you should install plugin to eclipse and add Annotation Library to build path(Project properties->Java Build Path->Libraries->Add Library).
 
-After that you should turn on annotation preprocessing for your project on the project properties screen and select plugin in factory path section.
-
-To use with ant you should add plugin to classpath only:
-
-`ant clean release -cp ../AnnotatedSQLProcessor.jar`
 
 The lib suppport common annotations to build tables, viewes, indexes, provider and provider query 
-
-Also plugin provides templates to create these structures.  
 
 Define scheme and provider
 --------
