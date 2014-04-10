@@ -19,6 +19,12 @@ Very easy way to add annotation processors to your andorid project - just use [a
 		}
 	}
 	
+	apply plugin: 'aptlibs'
+	
+	configurations {
+		apt
+	}
+	
 	ext.asVersion = '1.8.2'
 
 	dependencies {
