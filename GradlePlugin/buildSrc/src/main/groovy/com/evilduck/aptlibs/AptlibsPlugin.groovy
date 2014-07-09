@@ -65,7 +65,7 @@ public class AptlibsPlugin implements Plugin<Project> {
 
     def modifyJavaCompilerArguments() {
         project.android.applicationVariants.all { variant ->
-            def aptOutput = project.file("$project.buildDir/source/$aptlibsExt.aptDir/$variant.dirName")
+            def aptOutput = project.file("$project.buildDir/generated/source/$aptlibsExt.aptDir/$variant.dirName")
             variant.addJavaSourceFoldersToModel(aptOutput)
 
             variant.javaCompile.doFirst {
