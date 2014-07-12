@@ -3,6 +3,7 @@ Android-AnnotatedSQL
 
 Android library for auto generating SQL schema and Content Provider by annotations. You will get a full-featured content provider in 5 minutes :)
 
+#####How to add to porject
 Now available in maven central repo:
 
 	com.github.hamsterksu:android-annotatedsql-api:1.8.2
@@ -38,7 +39,15 @@ Very easy way to add annotation processors to your andorid project - just use [a
 	}
 
 
+#####Changelog
+######version 1.9.0
+* bulkinsert: support 2 modes: replace and insert
+*  insert: support all conflict resolution modes
+*  add 2 new arguments to @Provider - default mode for bulkinsert and insert
+*  add UriBuilder to provider
+*  rename methods, old methods were marked as @Deprecated
 
+--------
 The lib suppport common annotations to build tables, viewes, indexes, provider and provider query 
 
 Define scheme and provider
