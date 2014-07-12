@@ -14,6 +14,9 @@ public class ProviderMeta {
 	private String authority;
 	private String openHelperClass;
 	private boolean supportTransaction;
+
+    private String bulkInsertMode;
+    private int insertMode;
 	
 	private List<UriMeta> entities = new ArrayList<UriMeta>();
 	private List<String> imports = new ArrayList<String>();
@@ -90,4 +93,20 @@ public class ProviderMeta {
 	public String getStoreClassName() {
 		return storeClassName;
 	}
+
+    public String getBulkInsertMode() {
+        return bulkInsertMode;
+    }
+
+    public void setBulkInsertMode(String bulkInsertMode) {
+        this.bulkInsertMode = bulkInsertMode;
+    }
+
+    public int getInsertMode() {
+        return insertMode;
+    }
+
+    public void setInsertMode(int insertMode) {
+        this.insertMode = insertMode;
+    }
 }

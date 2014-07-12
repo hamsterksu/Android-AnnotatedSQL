@@ -9,8 +9,17 @@ public @interface Provider {
 	
 	/**
 	 * wrap methods bulkInsert and applyBatch to transaction 
-	 * @return
 	 */
-	boolean supportTransaction() default true; 
+	boolean supportTransaction() default true;
+
+    /**
+     * by default use REPLACE mode
+     */
+    String bulkInsertMode() default "REPLACE";
+
+    /**
+     * by default SQLiteDatabase.CONFLICT_REPLACE mode
+     */
+    int insertMode() default 5;
 	
 }

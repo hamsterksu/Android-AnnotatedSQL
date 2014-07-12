@@ -25,16 +25,30 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.net.Uri.Builder;
 import android.text.TextUtils;
+import android.util.Log;
 
 
 public class ${className} extends ContentProvider{
 
+    public static final String TAG = ${className}.class.getSimpleName();
+
+    public static enum BulkInsertConflictMode {
+        INSERT, REPLACE
+    }
+
 	public static final String AUTHORITY = "${authority}";
-	public static final String FRAGMENT_NO_NOTIFY = "no-notify";
-	public static final String QUERY_LIMIT = "limit";
-	public static final String QUERY_GROUP_BY = "groupBy";
-	
+
+    @Deprecated
+	public static final String FRAGMENT_NO_NOTIFY = UriBuilder.FRAGMENT_NO_NOTIFY;
+
+    @Deprecated
+	public static final String QUERY_LIMIT = UriBuilder.QUERY_LIMIT;
+
+    @Deprecated
+	public static final String QUERY_GROUP_BY = UriBuilder.QUERY_GROUP_BY;
+
 	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
 	protected final static int MATCH_TYPE_ITEM = 0x0001;
@@ -55,6 +69,9 @@ public class ${className} extends ContentProvider{
 	
 	protected SQLiteOpenHelper dbHelper;
 	protected ContentResolver contentResolver;
+
+    protected BulkInsertConflictMode defaultBulkInsertConflictMode = BulkInsertConflictMode.${bulkInsertMode};
+    protected int defaultInsertConflictMode = ${insertMode};
 
 	@Override
 	public boolean onCreate() {
@@ -118,7 +135,9 @@ public class ${className} extends ContentProvider{
 		}
 		Cursor c = query.query(dbHelper.getReadableDatabase(),
         		projection, selection, selectionArgs,
-        		uri.getQueryParameter(QUERY_GROUP_BY), null, sortOrder, uri.getQueryParameter(QUERY_LIMIT));
+        		UriBuilder.getGroupBy(uri),
+        		null, sortOrder,
+        		UriBuilder.getLimit(uri));
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 		
 		return c;
@@ -156,6 +175,8 @@ public class ${className} extends ContentProvider{
 			default:
 				throw new IllegalArgumentException("Unsupported uri " + uri);
 		}
+
+        BulkInsertConflictMode conflict = UriBuilder.getBulkInsertConflictMode(uri, defaultBulkInsertConflictMode);
 		SQLiteDatabase sql = dbHelper.getWritableDatabase();
 		sql.beginTransaction();
 		int count = 0;
@@ -165,8 +186,15 @@ public class ${className} extends ContentProvider{
 			<#list entities as e>
 				<@addInsertBeforeTrigger uri=e />
 			</#list>
-				ih.replace(values);
-				count++;
+                long id;
+                if(conflict == BulkInsertConflictMode.REPLACE) {
+                    id = ih.replace(values);
+                }else{
+                    id = ih.insert(values);
+                }
+                if(id != -1) {
+                    count++;
+                }
 			}
 			ih.close();
 			sql.setTransactionSuccessful();
@@ -177,11 +205,12 @@ public class ${className} extends ContentProvider{
 			sql.endTransaction();
 		}
 		
-		if (!ignoreNotify(uri)) {
+		if (!UriBuilder.isIgnoreNotify(uri)) {
 			notifyUri(contentResolver, uri);
 		}
     	return count;
     }
+
 </#if>
 
 	@Override
@@ -204,16 +233,17 @@ public class ${className} extends ContentProvider{
 		<#list entities as e>
 			<@addInsertBeforeTrigger uri=e />
 		</#list>
-		long id = dbHelper.getWritableDatabase().insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        int conflictMode = UriBuilder.getInsertConflictMode(uri, defaultInsertConflictMode);
+        long id = dbHelper.getWritableDatabase().insertWithOnConflict(table, null, values, conflictMode);
 		<#list entities as e>
 			<@addInsertAfterTrigger uri=e />
 		</#list>
-		if(!ignoreNotify(uri)){
+		if(!UriBuilder.isIgnoreNotify(uri)){
 			notifyUri(contentResolver, uri);
 		}
 		return Uri.withAppendedPath(uri, String.valueOf(id));
 	}
-	
+
 	@Override
 	@SuppressWarnings("unused")
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
@@ -242,7 +272,7 @@ public class ${className} extends ContentProvider{
 		<#list entities as e>
 			<@addUpdateAfterTrigger uri=e />
 		</#list>
-		if(!ignoreNotify(uri)){
+		if(!UriBuilder.isIgnoreNotify(uri)){
 			notifyUri(contentResolver, uri);
 		}
 		
@@ -277,7 +307,7 @@ public class ${className} extends ContentProvider{
 		<#list entities as e>
 			<@addDeleteAfterTrigger uri=e />
 		</#list>
-		if(!ignoreNotify(uri)){
+		if(!UriBuilder.isIgnoreNotify(uri)){
 			notifyUri(contentResolver, uri);
 		}
 		return count;
@@ -345,61 +375,188 @@ public class ${className} extends ContentProvider{
 			</#list> 
 		}
 	}
-	
-	protected static boolean ignoreNotify(Uri uri){
-		return FRAGMENT_NO_NOTIFY.equals(uri.getFragment());
-	}
-	
-	protected String composeIdSelection(String originalSelection, String id, String idColumn) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(idColumn).append('=').append(id);
-        if (!TextUtils.isEmpty(originalSelection)) {
-            sb.append(" AND (").append(originalSelection).append(')');
-        }
-        return sb.toString();
+
+    @Deprecated
+    protected static boolean ignoreNotify(Uri uri){
+        return UriBuilder.isIgnoreNotify(uri);
     }
- 
- 	public static Uri getContentUri(String path){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).build(); 
-	}
-	
-	public static Uri getContentUriGroupBy(String path, String groupBy){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).appendQueryParameter(QUERY_GROUP_BY, groupBy).build(); 
-	}
-	
-	public static Uri getContentUri(String path, long id){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).appendPath(String.valueOf(id)).build(); 
-	}
-	
-	public static Uri getContentUri(String path, String id){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).appendPath(id).build(); 
-	}
-	
-	public static Uri getContentWithLimitUri(String path, int limit){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).appendQueryParameter(QUERY_LIMIT, String.valueOf(limit)).build(); 
-	}
-	
-	public static Uri getNoNotifyContentUri(String path){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).fragment(FRAGMENT_NO_NOTIFY).build(); 
-	}
-	
-	public static Uri getNoNotifyContentUri(String path, long id){
-		if(TextUtils.isEmpty(path))
-			return null;
-		return BASE_URI.buildUpon().appendPath(path).appendPath(String.valueOf(id)).fragment(FRAGMENT_NO_NOTIFY).build(); 
-	}
+
+    @Deprecated
+    public static Uri getContentUri(String path){
+        return getUriBuilder().append(path).build();
+    }
+
+    public static Uri contentUri(String path){
+        return getUriBuilder().append(path).build();
+    }
+
+    @Deprecated
+    public static Uri getContentUriGroupBy(String path, String groupBy){
+        return getUriBuilder().append(path).groupBy(groupBy).build();
+    }
+
+    public static Uri contentUriGroupBy(String path, String groupBy){
+        return getUriBuilder().append(path).groupBy(groupBy).build();
+    }
+
+    @Deprecated
+    public static Uri getContentUri(String path, long id){
+        return getUriBuilder().append(path).append(id).build();
+    }
+
+    public static Uri contentUri(String path, long id){
+        return getUriBuilder().append(path).append(id).build();
+    }
+
+    @Deprecated
+    public static Uri getContentUri(String path, String id){
+        return getUriBuilder().append(path).append(id).build();
+    }
+
+    public static Uri contentUri(String path, String id){
+        return getUriBuilder().append(path).append(id).build();
+    }
+
+    @Deprecated
+    public static Uri getContentWithLimitUri(String path, int limit){
+        return getUriBuilder().append(path).limit(limit).build();
+    }
+
+    public static Uri contentUriWithLimit(String path, int limit){
+        return getUriBuilder().append(path).limit(limit).build();
+    }
+
+    @Deprecated
+    public static Uri getNoNotifyContentUri(String path){
+        return getUriBuilder().append(path).noNotify().build();
+    }
+
+    public static Uri contentUriNoNotify(String path){
+        return getUriBuilder().append(path).noNotify().build();
+    }
+
+    public static Uri contentUriInsertNoNotify(String path, int conflicResolution){
+        return getUriBuilder().append(path).noNotify().insertConflictMode(conflicResolution).build();
+    }
+
+    public static Uri contentUriInsert(String path, int conflicResolution){
+        return getUriBuilder().append(path).insertConflictMode(conflicResolution).build();
+    }
+
+    public static Uri contentUriBulkInsertNoNotify(String path, BulkInsertConflictMode conflict){
+        return getUriBuilder().append(path).noNotify().bulkInsertMode(conflict).build();
+    }
+
+    public static Uri contentUriBulkInsert(String path, BulkInsertConflictMode conflict){
+        return getUriBuilder().append(path).bulkInsertMode(conflict).build();
+    }
+
+    @Deprecated
+    public static Uri getNoNotifyContentUri(String path, long id){
+        return getUriBuilder().append(path).append(id).noNotify().build();
+    }
+
+    public static UriBuilder getUriBuilder(){
+        return new UriBuilder(BASE_URI);
+    }
+
+    public static class UriBuilder{
+
+        public static final String FRAGMENT_NO_NOTIFY = "no-notify";
+        public static final String QUERY_LIMIT = "limit";
+        public static final String QUERY_GROUP_BY = "groupBy";
+        public static final String QUERY_BULK_INSERT_CONFLICT_MODE = "biMode";
+        public static final String QUERY_INSERT_CONFLICT_MODE = "icMode";
+
+        private Uri.Builder uri;
+
+        public UriBuilder(Uri uri){
+            this.uri = uri.buildUpon();
+        }
+
+        public UriBuilder(String uri){
+            this.uri = Uri.parse(uri).buildUpon();
+        }
+
+        public UriBuilder append(String path){
+            if(TextUtils.isEmpty(path)){
+                return this;
+            }
+            uri.appendPath(path);
+            return this;
+        }
+
+        public UriBuilder append(long id){
+            uri.appendPath(String.valueOf(id));
+            return this;
+        }
+
+        public UriBuilder noNotify(){
+            uri.fragment(FRAGMENT_NO_NOTIFY);
+            return this;
+        }
+
+        public UriBuilder limit(int limit){
+            uri.appendQueryParameter(QUERY_LIMIT, String.valueOf(limit));
+            return this;
+        }
+
+        public UriBuilder insertConflictMode(int conflictMode){
+            uri.appendQueryParameter(QUERY_INSERT_CONFLICT_MODE, String.valueOf(conflictMode));
+            return this;
+        }
+
+        public UriBuilder bulkInsertMode(BulkInsertConflictMode conflict){
+            uri.appendQueryParameter(QUERY_BULK_INSERT_CONFLICT_MODE, conflict.name());
+            return this;
+        }
+
+        public UriBuilder groupBy(String groupBy){
+            uri.appendQueryParameter(QUERY_GROUP_BY, groupBy);
+            return this;
+        }
+
+        public Uri build(){
+            return uri.build();
+        }
+
+        public Builder raw(){
+            return uri;
+        }
+
+        public static boolean isIgnoreNotify(Uri uri) {
+            return FRAGMENT_NO_NOTIFY.equals(uri.getFragment());
+        }
+
+        public static BulkInsertConflictMode getBulkInsertConflictMode(Uri uri, BulkInsertConflictMode defValue) {
+            String mode = uri.getQueryParameter(QUERY_BULK_INSERT_CONFLICT_MODE);
+            if(TextUtils.isEmpty(mode)){
+                return defValue;
+            }
+            return BulkInsertConflictMode.valueOf(mode);
+        }
+
+        public static int getInsertConflictMode(Uri uri, int defValue) {
+            String mode = uri.getQueryParameter(QUERY_INSERT_CONFLICT_MODE);
+            if(TextUtils.isEmpty(mode)){
+                return defValue;
+            }
+            try {
+                return Integer.parseInt(mode);
+            }catch (NumberFormatException e){
+                Log.e(TAG, "getInsertConflict parse mode error", e);
+                return defValue;
+            }
+        }
+
+        public static String getLimit(Uri uri){
+            return uri.getQueryParameter(QUERY_LIMIT);
+        }
+
+        public static String getGroupBy(Uri uri){
+            return uri.getQueryParameter(QUERY_GROUP_BY);
+        }
+    }
 	
 	<#if generateHelper>   
 	protected class AnnotationSql extends SQLiteOpenHelper {
@@ -421,6 +578,15 @@ public class ${className} extends ContentProvider{
 
 	}
 	</#if>
+
+    public static String composeIdSelection(String originalSelection, String id, String idColumn) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(idColumn).append('=').append(id);
+        if (!TextUtils.isEmpty(originalSelection)) {
+            sb.append(" AND (").append(originalSelection).append(')');
+        }
+        return sb.toString();
+    }
 
     /**
      * Concatenates two SQL WHERE clauses, handling empty or null values.

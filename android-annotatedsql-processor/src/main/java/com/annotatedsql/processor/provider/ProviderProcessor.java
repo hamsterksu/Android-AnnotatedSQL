@@ -95,6 +95,9 @@ public class ProviderProcessor extends AbstractProcessor {
 
                 provider.setAuthority(providerElement.authority());
                 provider.setSupportTransaction(providerElement.supportTransaction());
+
+                provider.setBulkInsertMode(providerElement.bulkInsertMode());
+                provider.setInsertMode(providerElement.insertMode());
             }
         } else {
             return false;
