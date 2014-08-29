@@ -66,7 +66,19 @@ public class ${className} extends ContentProvider{
 		matcher.addURI(AUTHORITY, ${e.path}, MATCH_${getMathcName(e.path)}); 
 		</#list> 
 	}
-	
+
+    private static final String SYMBOL_QUERY = "?";
+	private static final String SYMBOL_EQUALS = "=";
+    private static final String SYMBOL_OPEN_PARENT = "(";
+    private static final String SYMBOL_CLOSE_PARENT = ")";
+    private static final String SYMBOL_AND = " AND ";
+    private static final String SYMBOL_WHERE = " WHERE ";
+    private static final String SYMBOL_ORDER_BY = " ORDER BY ";
+    private static final String SYMBOL_EMPTY = "";
+    private static final String VND_DIRECTORY = "/vnd.";
+    private static final String EXTENSION_ITEM = ".item";
+    private static final String EXTENSION_DIR = ".dir";
+
 	protected SQLiteOpenHelper dbHelper;
 	protected ContentResolver contentResolver;
 
@@ -90,10 +102,10 @@ public class ${className} extends ContentProvider{
 		final String type;
 		switch (matcher.match(uri) & MATCH_TYPE_MASK) {
 			case MATCH_TYPE_ITEM:
-				type = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + AUTHORITY + ".item";
+				type = ContentResolver.CURSOR_ITEM_BASE_TYPE + VND_DIRECTORY + AUTHORITY + EXTENSION_ITEM;
 				break;
 			case MATCH_TYPE_DIR:
-				type = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd." + AUTHORITY + ".dir";
+				type = ContentResolver.CURSOR_DIR_BASE_TYPE + VND_DIRECTORY + AUTHORITY + EXTENSION_DIR;
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported uri " + uri);
@@ -109,18 +121,18 @@ public class ${className} extends ContentProvider{
 			case MATCH_${getMathcName(e.path)}:{
 			<#if e.rawQuery>
 				Cursor c = dbHelper.getReadableDatabase().rawQuery(${schemaClassName}.${e.tableLink?upper_case}
-					+ (TextUtils.isEmpty(selection) ? "" : " where " + selection) 
-					+ (TextUtils.isEmpty(sortOrder) ? "" : " order by " + sortOrder)
+					+ (TextUtils.isEmpty(selection) ? SYMBOL_EMPTY : SYMBOL_WHERE + selection)
+					+ (TextUtils.isEmpty(sortOrder) ? SYMBOL_EMPTY : SYMBOL_ORDER_BY + sortOrder)
 					, selectionArgs);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 				return c;  
 			<#else>
 				query.setTables(${e.tableLink});
 				<#if e.item && e.where >
-                selection = concatenateWhere(selection, "${e.selectColumn} = ? and ${e.queryWhere}");
+                selection = concatenateWhere(selection, "${e.selectColumn}"+ SYMBOL_EQUALS + SYMBOL_QUERY + SYMBOL_AND + "${e.queryWhere}");
                 selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment(), ${e.whereArgs}});
 				<#elseif e.item>
-				selection = concatenateWhere(selection, "${e.selectColumn} = ?");
+				selection = concatenateWhere(selection, "${e.selectColumn}" + SYMBOL_EQUALS + SYMBOL_QUERY);
 				selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment()});
 				<#elseif e.where>
 				selection = concatenateWhere(selection, "${e.queryWhere}");
@@ -581,9 +593,9 @@ public class ${className} extends ContentProvider{
 
     public static String composeIdSelection(String originalSelection, String id, String idColumn) {
         StringBuffer sb = new StringBuffer();
-        sb.append(idColumn).append('=').append(id);
+        sb.append(idColumn).append(SYMBOL_EQUALS).append(id);
         if (!TextUtils.isEmpty(originalSelection)) {
-            sb.append(" AND (").append(originalSelection).append(')');
+            sb.append(SYMBOL_AND).append(SYMBOL_OPEN_PARENT).append(originalSelection).append(SYMBOL_CLOSE_PARENT);
         }
         return sb.toString();
     }
@@ -599,7 +611,9 @@ public class ${className} extends ContentProvider{
             return a;
         }
 
-        return "(" + a + ") AND (" + b + ")";
+        final StringBuilder sb = new StringBuilder(SYMBOL_OPEN_PARENT);
+        sb.append(a).append(SYMBOL_CLOSE_PARENT).append(SYMBOL_AND).append(SYMBOL_OPEN_PARENT).append(b).append(SYMBOL_CLOSE_PARENT);
+        return sb.toString();
     }
 
     /**
