@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -41,7 +42,7 @@ public class TableParser{
 		this.parserEnv = parserEnv;
 	}
 	
-	public TableResult parse() {
+	public TableResult parse(ProcessingEnvironment processingEnvironment) {
 		TableColumns tableColumns = new TableColumns(c.getSimpleName().toString(), false); 
 		
 		Table table = c.getAnnotation(Table.class);
@@ -65,7 +66,7 @@ public class TableParser{
 			if(column == null)
 				continue;
 			
-			ColumnMeta meta = ColumnProcessor.create((VariableElement)f);
+			ColumnMeta meta = ColumnProcessor.create(processingEnvironment, (VariableElement)f);
 			tableColumns.add(f.getSimpleName().toString(), meta.name);
 			hasPrimaryKey |= meta.isPrimary;
 			sql.append(',').append(meta.sql);
