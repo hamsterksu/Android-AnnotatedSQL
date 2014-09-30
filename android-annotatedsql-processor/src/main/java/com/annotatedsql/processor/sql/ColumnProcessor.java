@@ -56,7 +56,7 @@ public class ColumnProcessor {
         }
         String defVal = column.defVal();
         if (!TextUtils.isEmpty(defVal)) {
-            sql.append(" DEFAULT (").append(defVal).append(")");
+            sql.append(" DEFAULT '").append(defVal).append("'");
         }
 
         return new ColumnMeta(columnName, isPrimary, sql.toString());

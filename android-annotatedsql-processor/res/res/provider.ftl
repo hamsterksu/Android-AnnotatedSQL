@@ -158,16 +158,23 @@ public class ${className} extends ContentProvider{
 <#if supportTransaction>
 	@Override
 	public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
-		SQLiteDatabase sql = dbHelper.getWritableDatabase();
-		sql.beginTransaction();
-		ContentProviderResult[] res = null;
-		try{
-			res = super.applyBatch(operations);
-			sql.setTransactionSuccessful();
-		}finally{
-			sql.endTransaction();
-		}
-		return res;
+		final SQLiteDatabase sql = dbHelper.getWritableDatabase();
+        sql.beginTransaction();
+        final int numOperations = operations.size();
+        final ContentProviderResult[] res = new ContentProviderResult[numOperations];
+        try {
+            for (int i = 0; i < numOperations; i++) {
+                final ContentProviderOperation operation = operations.get(i);
+                res[i] = operation.apply(this, res, i);
+                if (operation.isYieldAllowed()) {
+                    sql.yieldIfContendedSafely();
+                }
+            }
+            sql.setTransactionSuccessful();
+        } finally {
+            sql.endTransaction();
+        }
+        return res;
 	}
 
 	
