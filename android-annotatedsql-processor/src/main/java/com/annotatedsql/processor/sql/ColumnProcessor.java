@@ -86,7 +86,6 @@ public class ColumnProcessor {
                 result = Column.Type.BLOB;
                 break;
             case DECLARED:
-                logger.i("class " + env.getTypeUtils().asElement(annotationClassField).getSimpleName());
                 String declaringClass = env.getTypeUtils().asElement(annotationClassField).toString();
                 if (Integer.class.getCanonicalName() == declaringClass
                         || Long.class.getCanonicalName() == declaringClass
