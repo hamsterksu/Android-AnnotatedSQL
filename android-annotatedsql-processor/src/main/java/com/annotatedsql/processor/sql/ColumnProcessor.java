@@ -9,6 +9,8 @@ import com.annotatedsql.annotation.sql.Unique;
 import com.annotatedsql.processor.ProcessorLogger;
 import com.annotatedsql.util.TextUtils;
 
+import java.util.Date;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
@@ -88,7 +90,8 @@ public class ColumnProcessor {
                 String declaringClass = env.getTypeUtils().asElement(annotationClassField).toString();
                 if (Integer.class.getCanonicalName() == declaringClass
                         || Long.class.getCanonicalName() == declaringClass
-                        || Boolean.class.getCanonicalName() == declaringClass) {
+                        || Boolean.class.getCanonicalName() == declaringClass
+                        || Date.class.getCanonicalName() == declaringClass) {
                     result = Column.Type.INTEGER;
                 } else if (Double.class.getCanonicalName() == declaringClass
                         || Float.class.getCanonicalName() == declaringClass) {
