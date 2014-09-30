@@ -3,6 +3,7 @@ package com.annotatedsql.processor.provider;
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.ParserEnv;
 import com.annotatedsql.annotation.provider.Provider;
+import com.annotatedsql.annotation.provider.Providers;
 import com.annotatedsql.annotation.provider.Trigger;
 import com.annotatedsql.annotation.provider.Trigger.When;
 import com.annotatedsql.annotation.provider.Triggers;
@@ -42,8 +43,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-@SupportedAnnotationTypes({"com.annotatedsql.annotation.provider.Provider"})
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedAnnotationTypes({"com.annotatedsql.annotation.provider.Provider", "com.annotatedsql.annotation.provider.Providers"})
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class ProviderProcessor extends AbstractProcessor {
 
     private final static int MATCH_TYPE_ITEM = 0x0001;
@@ -62,49 +63,88 @@ public class ProviderProcessor extends AbstractProcessor {
             return false;
         cfg.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/res"));
         try {
-            return processSchema(roundEnv);
+            return processProviders(roundEnv);
         } catch (AnnotationParsingException e) {
             logger.e(e.getMessage(), e.getElements());
             return false;
         }
     }
 
-    private boolean processSchema(RoundEnvironment roundEnv) {
-        ProviderMeta provider;
-
-        Set<? extends Element> providerElements = roundEnv.getElementsAnnotatedWith(Provider.class);
-        if (providerElements != null && providerElements.size() != 0) {
-            if (providerElements.size() != 1) {
-                for (Element e : providerElements) {
-                    logger.e("Please use one provider file", e);
-                }
+    private boolean processProviders(RoundEnvironment roundEnv) {
+        Set<? extends Element> providersElements = roundEnv.getElementsAnnotatedWith(Providers.class);
+        if (providersElements != null && !providersElements.isEmpty()) {
+            if(providersElements.size() != 1){
+                logger.e("Please use one @Providers", providersElements);
                 return false;
-            } else {
-                Element e = providerElements.iterator().next();
-                Provider providerElement = e.getAnnotation(Provider.class);
-                if (TextUtils.isEmpty(providerElement.name())) {
-                    logger.e("Provider name can't be empty", e);
-                    return false;
-                }
-                provider = new ProviderMeta(e.getSimpleName().toString(), providerElement.name());
-                PackageElement pkg = (PackageElement) e.getEnclosingElement();
-                provider.setPkgName(pkg.getQualifiedName().toString());
-                provider.setSchemaClassName(providerElement.schemaClass());
-
-                provider.setOpenHelperClass(providerElement.openHelperClass());
-
-                provider.setAuthority(providerElement.authority());
-                provider.setSupportTransaction(providerElement.supportTransaction());
-
-                provider.setBulkInsertMode(providerElement.bulkInsertMode());
-                provider.setInsertMode(providerElement.insertMode());
             }
+            Element e = providersElements.iterator().next();
+            Providers ps = e.getAnnotation(Providers.class);
+            if(ps == null){
+                logger.e("ps is null", e);
+                return false;
+            }
+            Provider[] providers = ps.value();
+            if(providers == null || providers.length == 0){
+                logger.e("No one provider defined in @Providers", e);
+                return false;
+            }
+            boolean b = true;
+            for(Provider p : providers){
+                b &= processProvider(roundEnv, e, p);
+            }
+            return b;
         } else {
+            Set<? extends Element> providerElements = roundEnv.getElementsAnnotatedWith(Provider.class);
+            if (providerElements == null || providerElements.isEmpty()) {
+                return false;
+            }
+            if (providerElements.size() != 1) {
+                logger.e("Please use one provider file or @Providers for the same schema", providerElements);
+                return false;
+            }
+            Element e = providerElements.iterator().next();
+            return processProvider(roundEnv, e, null);
+        }
+    }
+
+    private boolean processProvider(RoundEnvironment roundEnv, Element e, Provider providerElement) {
+        logger.i("processProvider start");
+        if (e == null)
+            return false;
+
+        if(providerElement == null) {
+            providerElement = e.getAnnotation(Provider.class);
+        }
+        if (TextUtils.isEmpty(providerElement.name())) {
+            logger.e("Provider name can't be empty", e);
             return false;
         }
+        ProviderMeta provider = new ProviderMeta(e.getSimpleName().toString(), providerElement.name());
+        PackageElement pkg = (PackageElement) e.getEnclosingElement();
+        provider.setPkgName(pkg.getQualifiedName().toString());
+        provider.setSchemaClassName(providerElement.schemaClass());
 
+        provider.setOpenHelperClass(providerElement.openHelperClass());
+
+        provider.setAuthority(providerElement.authority());
+        provider.setSupportTransaction(providerElement.supportTransaction());
+
+        provider.setBulkInsertMode(providerElement.bulkInsertMode());
+        provider.setInsertMode(providerElement.insertMode());
+
+        processSchema(roundEnv, provider);
+
+        logger.i("processProvider before generate: "+ provider.getClassName());
+
+        processTemplateForModel(provider);
+
+        logger.i("processProvider end");
+        return true;
+    }
+
+    private void processSchema(RoundEnvironment roundEnv, ProviderMeta provider) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
-            if(!(element instanceof TypeElement))
+            if (!(element instanceof TypeElement))
                 continue;
             TableResult tableInfo = new TableParser((TypeElement)element, new ParserEnv(null), logger).parse(processingEnv);
             List<UriMeta> uris = processTable(element, tableInfo.getWhere());
@@ -129,8 +169,6 @@ public class ProviderProcessor extends AbstractProcessor {
                 provider.addUris(processQuery(element));
             }
         }
-        processTemplateForModel(provider);
-        return true;
     }
 
     private List<UriMeta> processQuery(Element element) {
@@ -222,8 +260,10 @@ public class ProviderProcessor extends AbstractProcessor {
     private void processTemplateForModel(ProviderMeta model) {
         JavaFileObject file;
         try {
-            file = processingEnv.getFiler().createSourceFile(model.getPkgName() + "." + model.getClassName());
-            logger.i("Creating file:  " + model.getPkgName() + "." + file.getName());
+            String filePath = model.getPkgName() + "." + model.getClassName();
+            logger.i("Creating file: " + filePath);
+            file = processingEnv.getFiler().createSourceFile(filePath);
+            logger.i("File created: " + filePath);
             Writer out = file.openWriter();
             Template t = cfg.getTemplate("provider.ftl");
             t.process(model, out);

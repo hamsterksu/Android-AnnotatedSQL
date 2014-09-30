@@ -36,7 +36,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @SupportedAnnotationTypes({"com.annotatedsql.annotation.sql.Schema"})
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class SQLProcessor extends AbstractProcessor {
 
     private ProcessorLogger logger;
