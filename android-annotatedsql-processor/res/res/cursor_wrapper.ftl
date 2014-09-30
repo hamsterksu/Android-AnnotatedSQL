@@ -5,6 +5,7 @@
 package ${pkgName};
 
 import android.database.Cursor;
+import java.util.Date;
 import ${tableCanonicalName};
 
 public class ${cursorWrapperName} extends AbstractCursorWrapper {
