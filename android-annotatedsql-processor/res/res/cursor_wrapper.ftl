@@ -14,7 +14,7 @@ public class ${cursorWrapperName} extends AbstractCursorWrapper {
     }
 
     <#list columnNameList as columnName>
-    <#if columnName != "_id">
+    <#if columnName != "_ID">
     public ${getClassTypeForColumn(columnName)} get${convertInCamelCase(columnName)}() {
     <#switch getClassTypeForColumn(columnName)>
             <#case "Integer">
@@ -42,6 +42,8 @@ public class ${cursorWrapperName} extends AbstractCursorWrapper {
             return getDouble(${tableClassName}.${columnName});
             <#break>
             <#case "Boolean">
+            return getBooleanOrNull(${tableClassName}.${columnName});
+            <#break>
             <#case "boolean">
             return getBoolean(${tableClassName}.${columnName});
             <#break>
@@ -49,8 +51,7 @@ public class ${cursorWrapperName} extends AbstractCursorWrapper {
             return getDate(${tableClassName}.${columnName});
             <#break>
             <#case "byte[]">
-            Integer index = getCachedColumnIndexOrThrow(${tableClassName}.${columnName});
-            return getBlob(index);
+            return getBlob(${tableClassName}.${columnName});
             <#break>
             <#case "String">
             <#default>

@@ -89,6 +89,14 @@ public abstract class AbstractCursorWrapper extends CursorWrapper {
         return Double.valueOf(getDouble(index));
     }
 
+    protected Boolean getBooleanOrNull(String colName) {
+        final int index = getCachedColumnIndexOrThrow(colName);
+        if (isNull(index)) {
+            return null;
+        }
+        return Boolean.valueOf(getInt(colName) == 1);
+    }
+
     protected Date getDate(String colName) {
         final int index = getCachedColumnIndexOrThrow(colName);
         if (isNull(index)) {
@@ -97,11 +105,16 @@ public abstract class AbstractCursorWrapper extends CursorWrapper {
         return new Date(getLong(index));
     }
 
-    public String getString(String columnName) {
+    protected String getString(String columnName) {
         final Integer index = getCachedColumnIndexOrThrow(columnName);
         if (isNull(index)) {
             return null;
         }
         return getString(index);
+    }
+
+    protected byte[] getBlob(String colName){
+        final int index = getCachedColumnIndexOrThrow(colName);
+        return getBlob(index);
     }
 }
