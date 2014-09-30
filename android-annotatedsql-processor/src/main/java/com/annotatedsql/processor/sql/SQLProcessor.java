@@ -115,7 +115,7 @@ public class SQLProcessor extends AbstractProcessor {
 
             WrapperResult lWrapperResult = new WrapperParser(typeElement, parserEnv, logger).parse(processingEnv);
 
-            CursorWrapperMeta lCursorWrapperMeta = new CursorWrapperMeta(schema.getPkgName(), table.value(), element.getSimpleName().toString(), lWrapperResult.getColumns(), lWrapperResult.getColumnsToType());
+            CursorWrapperMeta lCursorWrapperMeta = new CursorWrapperMeta(schema.getPkgName(), element, lWrapperResult.getColumns(), lWrapperResult.getColumnsToType());
             processCursorWrapper(lCursorWrapperMeta);
         }
 

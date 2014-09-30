@@ -20,13 +20,12 @@ public class ColumnWrapperProcessor {
      */
     public static ColumnWrapperMeta create(ProcessingEnvironment env, VariableElement f, ProcessorLogger logger) {
         logger.i("create ColumnWrapperMeta");
-        String columnName = null;
+        String columnName;
         try {
-            columnName = (String) f.getConstantValue();
+            columnName = f.toString();
         } catch (Exception e) {
             throw new AnnotationParsingException("Can not find column name", f);
         }
-
         Column column = f.getAnnotation(Column.class);
 
         TypeMirror annotationClassField = null;

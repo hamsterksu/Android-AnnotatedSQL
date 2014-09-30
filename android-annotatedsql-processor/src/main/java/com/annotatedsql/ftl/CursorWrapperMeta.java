@@ -4,15 +4,16 @@ import com.annotatedsql.util.TextUtils;
 
 import java.util.List;
 import java.util.Map;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 
 /**
  * Created by jbanse on 21/09/2014.
  */
 public class CursorWrapperMeta {
 
+    private final String tableCanonicalName;
     private String pkgName;
-
-    private final String tableName;
 
     private final String tableClassName;
 
@@ -20,16 +21,12 @@ public class CursorWrapperMeta {
 
     private final List<String> columnNameList;
 
-    public CursorWrapperMeta(String packageName, String tableClassName, String tableName, List<String> columnNameList, Map<String, String> columnToType) {
+    public CursorWrapperMeta(String packageName, Element tableClassName, List<String> columnNameList, Map<String, String> columnToType) {
         pkgName = packageName;
-        this.tableName = tableName;
         this.columnNameList = columnNameList;
         this.columnToType = columnToType;
-        this.tableClassName = tableClassName;
-    }
-
-    public void setPkgName(String pkgName) {
-        this.pkgName = pkgName;
+        this.tableClassName = tableClassName.getSimpleName().toString();
+        this.tableCanonicalName = ((TypeElement)tableClassName).getQualifiedName().toString();
     }
 
     public String getPkgName() {
@@ -37,7 +34,7 @@ public class CursorWrapperMeta {
     }
 
     public String getCursorWrapperName() {
-        return tableName + "Cursor";
+        return tableClassName.concat("Cursor");
     }
 
     public List<String> getColumnNameList() {
@@ -54,6 +51,10 @@ public class CursorWrapperMeta {
 
     public String getTableClassName() {
         return tableClassName;
+    }
+
+    public String getTableCanonicalName() {
+        return tableCanonicalName;
     }
 
 }
