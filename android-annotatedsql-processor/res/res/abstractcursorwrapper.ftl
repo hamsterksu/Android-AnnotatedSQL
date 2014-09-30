@@ -96,4 +96,12 @@ public abstract class AbstractCursorWrapper extends CursorWrapper {
         }
         return new Date(getLong(index));
     }
+
+    public String getString(String columnName) {
+        final Integer index = getCachedColumnIndexOrThrow(columnName);
+        if (isNull(index)) {
+            return null;
+        }
+        return getString(index);
+    }
 }
