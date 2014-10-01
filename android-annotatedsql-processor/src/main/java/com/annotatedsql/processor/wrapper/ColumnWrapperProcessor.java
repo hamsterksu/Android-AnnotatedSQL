@@ -2,6 +2,7 @@ package com.annotatedsql.processor.wrapper;
 
 import com.annotatedsql.AnnotationParsingException;
 import com.annotatedsql.annotation.sql.Column;
+import com.annotatedsql.ftl.ColumnWrapperMeta;
 import com.annotatedsql.processor.ProcessorLogger;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -45,18 +46,6 @@ public class ColumnWrapperProcessor {
         }
 
         return lColumnWrapperMeta;
-    }
-
-    static class ColumnWrapperMeta {
-        final String name;
-        final String classType;
-
-        public ColumnWrapperMeta(String name, String clazz) {
-            super();
-            this.name = name;
-            classType = clazz;
-        }
-
     }
 
 }

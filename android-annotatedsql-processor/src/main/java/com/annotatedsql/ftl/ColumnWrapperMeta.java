@@ -1,11 +1,15 @@
 package com.annotatedsql.ftl;
 
 /**
- * Created by jbanse on 26/09/2014.
+ * Created by jbanse on 01/10/2014.
  */
-public class ColumnWrapperMeta extends ColumnMeta {
+public class ColumnWrapperMeta {
+    final String name;
+    final String classType;
 
-    public ColumnWrapperMeta(String variableName, String fullName, String alias, String variableAlias) {
-        super(variableName, fullName, alias, variableAlias);
+    public ColumnWrapperMeta(String name, String clazz) {
+        super();
+        this.name = name;
+        classType = clazz;
     }
 }
