@@ -19,44 +19,44 @@ public class ${cursorWrapperName} extends AbstractCursorWrapper {
     public ${getClassTypeForColumn(columnName)} get${convertInCamelCase(columnName)}() {
         <#switch getClassTypeForColumn(columnName)>
         <#case "Integer">
-        return getIntegerOrNull(${tableClassName}.${columnName});
+        return getIntegerOrNull(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "int">
-        return getInt(${tableClassName}.${columnName});
+        return getInt(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "Long">
-        return getLongOrNull(${tableClassName}.${columnName});
+        return getLongOrNull(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "long">
-        return getLong(${tableClassName}.${columnName});
+        return getLong(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "Float">
-        return getFloatOrNull(${tableClassName}.${columnName});
+        return getFloatOrNull(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "float">
-        return getFloat(${tableClassName}.${columnName});
+        return getFloat(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "double">
-        return getDoubleOrNull(${tableClassName}.${columnName});
+        return getDoubleOrNull(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "Double">
-        return getDouble(${tableClassName}.${columnName});
+        return getDouble(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "Boolean">
-        return getBooleanOrNull(${tableClassName}.${columnName});
+        return getBooleanOrNull(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "boolean">
-        return getBoolean(${tableClassName}.${columnName});
+        return getBoolean(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "Date">
-        return getDate(${tableClassName}.${columnName});
+        return getDate(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "byte[]">
-        return getBlob(${tableClassName}.${columnName});
+        return getBlob(${tableClassName}.${getVariableForColumn(columnName)});
         <#break>
         <#case "String">
         <#default>
-        return getString(${tableClassName}.${columnName});
+        return getString(${tableClassName}.${getVariableForColumn(columnName)});
         </#switch>
     }
     </#if>

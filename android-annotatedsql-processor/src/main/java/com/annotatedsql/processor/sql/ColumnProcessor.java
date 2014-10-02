@@ -6,7 +6,6 @@ import com.annotatedsql.annotation.sql.Column;
 import com.annotatedsql.annotation.sql.NotNull;
 import com.annotatedsql.annotation.sql.PrimaryKey;
 import com.annotatedsql.annotation.sql.Unique;
-import com.annotatedsql.processor.ProcessorLogger;
 import com.annotatedsql.util.TextUtils;
 
 import java.util.Date;
@@ -14,6 +13,7 @@ import java.util.Date;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 public class ColumnProcessor {
@@ -22,6 +22,8 @@ public class ColumnProcessor {
     }
 
     /**
+     * @param env
+     * @param f
      * @throws AnnotationParsingException
      */
     public static ColumnMeta create(ProcessingEnvironment env, VariableElement f) {
@@ -59,11 +61,23 @@ public class ColumnProcessor {
             sql.append(" DEFAULT '").append(defVal).append("'");
         }
 
-        return new ColumnMeta(columnName, isPrimary, sql.toString());
+        //add java type
+        TypeMirror annotationClassField = null;
+        try {
+            column.javaClass();
+        } catch (MirroredTypeException e) {
+            annotationClassField = e.getTypeMirror();
+        }
+        final String declaringClass;
+        if (annotationClassField.getKind() == TypeKind.DECLARED) {
+            declaringClass = env.getTypeUtils().asElement(annotationClassField).getSimpleName().toString();
+        } else {
+            declaringClass = annotationClassField.toString();
+        }
+        return new ColumnMeta(columnName, isPrimary, sql.toString(), declaringClass);
     }
 
     private static Column.Type getTypeFromClass(ProcessingEnvironment env, Column column) {
-        ProcessorLogger logger = new ProcessorLogger(env.getMessager());
         TypeMirror annotationClassField = null;
         Column.Type result;
         try {
@@ -109,12 +123,14 @@ public class ColumnProcessor {
         final String sql;
         final boolean isPrimary;
         final String name;
+        final String javaType;
 
-        public ColumnMeta(String name, boolean isPrimary, String sql) {
+        public ColumnMeta(String name, boolean isPrimary, String sql, final String javaType) {
             super();
             this.name = name;
             this.sql = sql;
             this.isPrimary = isPrimary;
+            this.javaType = javaType;
         }
 
     }

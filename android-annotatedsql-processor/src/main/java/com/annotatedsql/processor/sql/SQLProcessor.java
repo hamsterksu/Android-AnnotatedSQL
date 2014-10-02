@@ -11,8 +11,6 @@ import com.annotatedsql.ftl.IndexMeta;
 import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.TableMeta;
 import com.annotatedsql.processor.ProcessorLogger;
-import com.annotatedsql.processor.wrapper.WrapperParser;
-import com.annotatedsql.processor.wrapper.WrapperResult;
 import com.annotatedsql.util.TextUtils;
 
 import java.io.IOException;
@@ -113,9 +111,11 @@ public class SQLProcessor extends AbstractProcessor {
                 }
             }
 
-            WrapperResult lWrapperResult = new WrapperParser(typeElement, parserEnv, logger).parse(processingEnv);
-
-            CursorWrapperMeta lCursorWrapperMeta = new CursorWrapperMeta(schema.getPkgName(), element, lWrapperResult.getColumns(), lWrapperResult.getColumnsToType());
+            CursorWrapperMeta lCursorWrapperMeta = new CursorWrapperMeta(schema.getPkgName(),
+                    element,
+                    tableInfo.getColumns(),
+                    tableInfo.getColumn2type(),
+                    tableInfo.getColumn2Variable());
             processCursorWrapper(lCursorWrapperMeta);
         }
 

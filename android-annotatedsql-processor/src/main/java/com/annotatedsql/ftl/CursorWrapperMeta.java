@@ -4,6 +4,7 @@ import com.annotatedsql.util.TextUtils;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -18,15 +19,17 @@ public class CursorWrapperMeta {
     private final String tableClassName;
 
     private final Map<String, String> columnToType;
+    private final Map<String, String> columnToVariable;
 
     private final List<String> columnNameList;
 
-    public CursorWrapperMeta(String packageName, Element tableClassName, List<String> columnNameList, Map<String, String> columnToType) {
+    public CursorWrapperMeta(String packageName, Element tableClassName, List<String> columnNameList, Map<String, String> columnToType, Map<String, String> columnToVariable) {
         pkgName = packageName;
         this.columnNameList = columnNameList;
         this.columnToType = columnToType;
         this.tableClassName = tableClassName.getSimpleName().toString();
-        this.tableCanonicalName = ((TypeElement)tableClassName).getQualifiedName().toString();
+        this.tableCanonicalName = ((TypeElement) tableClassName).getQualifiedName().toString();
+        this.columnToVariable = columnToVariable;
     }
 
     public String getPkgName() {
@@ -43,6 +46,10 @@ public class CursorWrapperMeta {
 
     public String getClassTypeForColumn(String columnName) {
         return columnToType.get(columnName);
+    }
+
+    public String getVariableForColumn(String columnName) {
+        return columnToVariable.get(columnName);
     }
 
     public String convertInCamelCase(String columnName) {
