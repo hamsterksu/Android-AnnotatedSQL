@@ -2,6 +2,8 @@ package com.annotatedsql.ftl;
 
 import com.annotatedsql.util.TextUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,24 @@ public class CursorWrapperMeta {
     private final Map<String, String> columnToVariable;
 
     private final List<String> columnNameList;
+
+    public CursorWrapperMeta(String packageName, Element tableClassName, List<ViewMeta.ViewTableInfo> viewTableInfo) {
+        pkgName = packageName;
+        this.tableClassName = tableClassName.getSimpleName().toString();
+        this.tableCanonicalName = ((TypeElement) tableClassName).getQualifiedName().toString();
+        columnNameList = new ArrayList<String>();
+        columnToVariable = new HashMap<String, String>();
+        columnToType = new HashMap<String, String>();
+        for (ViewMeta.ViewTableInfo lViewTableInfo : viewTableInfo) {
+            for (ColumnMeta lColumnMeta : lViewTableInfo.getColumns()) {
+                String columnName = lColumnMeta.alias;
+                columnNameList.add(columnName);
+                columnToVariable.put(columnName, lColumnMeta.getVariableAlias());
+                columnToType.put(columnName, lColumnMeta.classType);
+            }
+        }
+    }
+
 
     public CursorWrapperMeta(String packageName, Element tableClassName, List<String> columnNameList, Map<String, String> columnToType, Map<String, String> columnToVariable) {
         pkgName = packageName;
