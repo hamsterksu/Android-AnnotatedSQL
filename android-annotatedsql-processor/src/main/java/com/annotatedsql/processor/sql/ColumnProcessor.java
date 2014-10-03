@@ -64,7 +64,7 @@ public class ColumnProcessor {
         //add java type
         TypeMirror annotationClassField = null;
         try {
-            column.javaClass();
+            column.javaType();
         } catch (MirroredTypeException e) {
             annotationClassField = e.getTypeMirror();
         }
@@ -81,7 +81,7 @@ public class ColumnProcessor {
         TypeMirror annotationClassField = null;
         Column.Type result;
         try {
-            column.javaClass();
+            column.javaType();
         } catch (MirroredTypeException e) {
             annotationClassField = e.getTypeMirror();
         }

@@ -128,7 +128,7 @@ public class TableParser {
     private String getJavaType(ProcessingEnvironment env, Column column) {
         TypeMirror annotationClassField = null;
         try {
-            column.javaClass();
+            column.javaType();
         } catch (MirroredTypeException e) {
             annotationClassField = e.getTypeMirror();
         }
