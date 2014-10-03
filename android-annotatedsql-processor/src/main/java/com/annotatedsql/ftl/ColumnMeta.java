@@ -7,14 +7,6 @@ public class ColumnMeta {
 	public final String variableName;
 	public final String variableAlias;
     public final String classType;
-//
-//    public ColumnMeta(String variableName, String classType){
-//        this.classType = classType;
-//        fullName = variableName;
-//        alias = variableName;
-//        this.variableName = null;
-//        variableAlias = null;
-//    }
 
 	public ColumnMeta(String variableName, String fullName, String alias, String variableAlias, String classType) {
 		super();
