@@ -131,13 +131,11 @@ public class TableParser {
             column.javaClass();
         } catch (MirroredTypeException e) {
             annotationClassField = e.getTypeMirror();
-            logger.i("mirror type=" + e);
         }
         String declaringType;
         if (annotationClassField.getKind() == TypeKind.DECLARED) {
             declaringType = env.getTypeUtils().asElement(annotationClassField).getSimpleName().toString();
         } else {
-            logger.i("find type=" + String.valueOf(annotationClassField));
             declaringType = annotationClassField.toString();
         }
         return declaringType;
