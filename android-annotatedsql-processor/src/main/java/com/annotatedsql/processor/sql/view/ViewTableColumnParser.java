@@ -91,7 +91,7 @@ public abstract class ViewTableColumnParser<T extends ParserResult, A extends An
 			}else{
 				variableAlias = parserEnv.getRootClass() + "." + tableColumns.getClassName() + "." + variable;
 			}
-			return new ColumnMeta(variable, aliasName + "." + c, c, variableAlias);
+			return new ColumnMeta(variable, aliasName + "." + c, c, variableAlias, tableColumns.getJavaType(c));
 		}else{
 			final String variableAlias;
 			if(tableColumns.isView()){
@@ -102,7 +102,7 @@ public abstract class ViewTableColumnParser<T extends ParserResult, A extends An
 						parserEnv.getRootClass(), tableColumns.getClassName(), variable);
 			}
 			return new ColumnMeta(variable, aliasName + "." + c, 
-					aliasName + "_" + c, variableAlias);
+					aliasName + "_" + c, variableAlias, tableColumns.getJavaType(c));
 		}
 	}
 	

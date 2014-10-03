@@ -146,7 +146,7 @@ public class ProviderProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
             if (!(element instanceof TypeElement))
                 continue;
-            TableResult tableInfo = new TableParser((TypeElement) element, new ParserEnv(null), logger).parse();
+            TableResult tableInfo = new TableParser((TypeElement)element, new ParserEnv(null), logger).parse(processingEnv);
             List<UriMeta> uris = processTable(element, tableInfo.getWhere());
             if (uris != null && !uris.isEmpty()) {
                 provider.addImport(((TypeElement) element).getQualifiedName().toString());

@@ -3,7 +3,7 @@ Android-AnnotatedSQL
 
 Android library for auto generating SQL schema and Content Provider by annotations. You will get a full-featured content provider in 5 minutes :)
 
-#####How to add to porject
+#####How to add to project
 Now available in maven central repo:
 
 	com.github.hamsterksu:android-annotatedsql-api:1.8.2
@@ -40,6 +40,10 @@ Very easy way to add annotation processors to your andorid project - just use [a
 
 
 #####Changelog
+######version 1.10.0
+* add generation of cursorwrapper to access to values in cursor with methods build with column names
+* breaking compatibility : remove type in @Column, replaced by javaType.
+
 ######version 1.9.0
 * bulkinsert: support 2 modes: replace and insert
 *  insert: support all conflict resolution modes
@@ -71,6 +75,7 @@ Auto generated class doesn't have ability to upgrate db. It will drop old db an 
 Use tipical annotations to define table.
 You can use **@PrimaryKey, @Autoincrement, @NotNull, @Unique** annotation to define column. Also you can add **@Index** or **@PrimaryKey** by few columns for table.
 
+
 To allow access to the table over content provider use **@URI** to mark content path 
 
     @Table(TeamTable.TABLE_NAME)
@@ -82,15 +87,18 @@ To allow access to the table over content provider use **@URI** to mark content 
 		String CONTENT_URI = "team_table";
 
 		@PrimaryKey
-		@Column(type = Type.INTEGER)
+		@Column(javaType = int.class)
 		String ID = "_id";
 		
-		@Column(type = Type.TEXT)
+		@Column(javaType = String.class)
 		String TITLE = "title";
 		
-		@Column(type = Type.INTEGER)
+		@Column(javaType = Integer.class)
 		String CHEMP_ID = "chemp_id";
 	}
+	
+**Java type managed :** int, Integer, long, Long, boolean, Boolean, double, Double, float, Float, Date, byte[], String
+
 *Define view*
 ----------------
 View is useful mechanism to aggregate data. You can use **@Join**, **@RawJoin** to join tables. The library support all join types: INNER, LEFT, RIGHT, CROSS

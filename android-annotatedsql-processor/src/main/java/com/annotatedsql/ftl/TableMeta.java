@@ -1,6 +1,8 @@
 package com.annotatedsql.ftl;
 
 
+import org.apache.commons.lang.WordUtils;
+
 public class TableMeta {
 
 	private final String tableName;
@@ -20,5 +22,9 @@ public class TableMeta {
 	public String getTableName() {
 		return tableName;
 	}
+
+    public String getTableNameCamelCase() {
+        return WordUtils.capitalizeFully(tableName, new char[]{'_'}).replaceAll("_", "");
+    }
 
 }
