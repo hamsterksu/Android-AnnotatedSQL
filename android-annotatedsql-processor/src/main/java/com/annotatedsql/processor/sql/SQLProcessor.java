@@ -10,6 +10,7 @@ import com.annotatedsql.ftl.CursorWrapperMeta;
 import com.annotatedsql.ftl.IndexMeta;
 import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.TableMeta;
+import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.ProcessorLogger;
 import com.annotatedsql.util.TextUtils;
 
@@ -121,7 +122,9 @@ public class SQLProcessor extends AbstractProcessor {
 
         for (Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)) {
             logger.i("SQLProcessor simple view found: " + element.getSimpleName());
-            schema.addView(new SimpleViewParser(element, parserEnv).parse());
+            ViewMeta lViewMeta = new SimpleViewParser(element, parserEnv).parse();
+            schema.addView(lViewMeta);
+            processCursorWrapperForView(new CursorWrapperMeta(schema.getPkgName(), element, lViewMeta.getTables()));
         }
 
         for (Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)) {
@@ -131,6 +134,7 @@ public class SQLProcessor extends AbstractProcessor {
         if (schema.isEmpty()) {
             return false;
         }
+
         processSchema(schema);
         processSchemaExt(schema);
         return true;
@@ -185,6 +189,23 @@ public class SQLProcessor extends AbstractProcessor {
             logger.i("Creating file:  " + tableMeta.getPkgName() + "." + tableMeta.getCursorWrapperName());
             Writer out = file.openWriter();
             Template t = cfg.getTemplate("cursor_wrapper.ftl");
+            t.process(tableMeta, out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            logger.e("EntityProcessor IOException: ", e);
+        } catch (TemplateException e) {
+            logger.e("EntityProcessor TemplateException: ", e);
+        }
+    }
+
+    private void processCursorWrapperForView(CursorWrapperMeta tableMeta) {
+        JavaFileObject file;
+        try {
+            file = processingEnv.getFiler().createSourceFile(tableMeta.getPkgName() + "." + tableMeta.getCursorWrapperName());
+            logger.i("Creating file:  " + tableMeta.getPkgName() + "." + tableMeta.getCursorWrapperName());
+            Writer out = file.openWriter();
+            Template t = cfg.getTemplate("view_cursor_wrapper.ftl");
             t.process(tableMeta, out);
             out.flush();
             out.close();
