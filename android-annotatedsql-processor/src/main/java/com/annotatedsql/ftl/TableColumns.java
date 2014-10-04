@@ -65,4 +65,12 @@ public class TableColumns implements Iterable<String>{
 	public String getClassName() {
 		return className;
 	}
+
+    public Map<String, String> getColumn2Variable() {
+        return column2variable;
+    }
+
+    public Map<String, String> getVariable2Columns() {
+        return variable2columns;
+    }
 }

@@ -1,7 +1,6 @@
 package com.annotatedsql.processor;
 
 import java.util.Collection;
-import java.util.Set;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -9,7 +8,8 @@ import javax.tools.Diagnostic.Kind;
 
 public class ProcessorLogger{
 
-	private Messager messager; 
+    public static final String LOG_TAG = "A_SQL: ";
+    private Messager messager;
 	
 	public ProcessorLogger(Messager messager) {
 		this.messager = messager;
@@ -20,7 +20,7 @@ public class ProcessorLogger{
 	}
 	
 	public void w(String msg, Element element){
-		messager.printMessage(Kind.WARNING, msg, element);
+		messager.printMessage(Kind.WARNING, LOG_TAG + msg, element);
 	}
 	
 	public void i(String msg){
@@ -28,15 +28,15 @@ public class ProcessorLogger{
 	}
 	
 	public void i(String msg, Element element){
-//		messager.printMessage(Kind.NOTE, msg, element);
+		//messager.printMessage(Kind.NOTE, LOG_TAG + msg, element);
 	}
 	
 	public void e(String msg, Throwable e, Element element){
-		if(e != null){
-			messager.printMessage(Kind.ERROR, msg + ": " + e.getMessage(), element);
-		}else{
-			messager.printMessage(Kind.ERROR, msg, element);
-		}
+        if(e != null){
+            messager.printMessage(Kind.ERROR, LOG_TAG + msg + ": " + e.getMessage(), element);
+        }else{
+            messager.printMessage(Kind.ERROR, LOG_TAG + msg, element);
+        }
 	}
 	
 	public void e(String msg, Throwable e){
@@ -48,7 +48,7 @@ public class ProcessorLogger{
 	}
 	
 	public void e(String msg, Element...elms){
-		if(elms != null){
+		if(elms != null && elms.length != 0){
 			for(Element e : elms){
 				e(msg, null, e);
 			}
@@ -58,7 +58,7 @@ public class ProcessorLogger{
 	}
 
     public void e(String msg, Collection<? extends Element> elms) {
-        if(elms != null){
+        if(elms != null && !elms.isEmpty()){
             for(Element e : elms){
                 e(msg, null, e);
             }

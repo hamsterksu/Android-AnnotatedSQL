@@ -12,6 +12,7 @@ import com.annotatedsql.ftl.IndexMeta;
 import com.annotatedsql.ftl.TableColumns;
 import com.annotatedsql.processor.ProcessorLogger;
 import com.annotatedsql.processor.sql.ColumnProcessor.ColumnMeta;
+import com.annotatedsql.util.ClassUtil;
 import com.annotatedsql.util.Where;
 
 import java.lang.annotation.Annotation;
@@ -24,7 +25,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeMirror;
 
 public class TableParser{
@@ -51,8 +51,7 @@ public class TableParser{
 			throw new AnnotationParsingException(String.format("Table/View with name '%s' already defined", tableName), c);
 		}
 
-        List<Element> fields = new ArrayList<Element>();
-        collectParentFields(fields, Arrays.asList(c.asType()));
+        List<Element> fields = ClassUtil.getAllClassFields(c);
 
 		final StringBuilder sql = new StringBuilder(fields.size() * 32);
         sql.append("create table ").append(tableName);
@@ -86,33 +85,10 @@ public class TableParser{
         
         parserEnv.addTable(tableName, tableColumns);
 
-        TableResult tableResult = new TableResult(sql.toString(), tableColumns.toColumnsList(), parseWhere());
+        TableResult tableResult = new TableResult(table.value(), sql.toString(), tableColumns, parseWhere());
         parserEnv.addTable(tableName, tableResult);
         return tableResult;
 	}
-
-    private void collectParentFields(List<Element> fields, List<? extends TypeMirror> typeMirrors){
-        if(typeMirrors == null || typeMirrors.isEmpty())
-            return;
-        for(TypeMirror p : typeMirrors){
-            if(p instanceof NoType){
-                continue;
-            }
-            Element superClass = ((DeclaredType)p).asElement();
-            List<? extends Element> inner = superClass.getEnclosedElements();
-            if(inner != null){
-                fields.addAll(inner);
-            }
-            if(superClass instanceof TypeElement){
-                TypeElement typeElement = ((TypeElement) superClass);
-                TypeMirror superclass = typeElement.getSuperclass();
-                if(superclass != null){
-                    collectParentFields(fields, Arrays.asList(superclass));
-                }
-                collectParentFields(fields, typeElement.getInterfaces());
-            }
-        }
-    }
 
     private Where parseWhere(){
         List<StaticWhere> annotations = new ArrayList<StaticWhere>();

@@ -9,15 +9,20 @@ import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.IndexMeta;
 import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.TableMeta;
+import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.ProcessorLogger;
 import com.annotatedsql.util.TextUtils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -36,116 +41,207 @@ import freemarker.template.TemplateException;
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class SQLProcessor extends AbstractProcessor {
 
-	private ProcessorLogger logger;
-	private Configuration cfg = new Configuration();
+    public static final String ARG_PLUGINS = "plugins";
 
-	@Override
-	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		
-		logger = new ProcessorLogger(processingEnv.getMessager());
-		logger.i("SQLProcessor started");
-		if(annotations == null || annotations.size() == 0)
-			return false;
-		cfg.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/res"));
-		try{
-			return processTable(roundEnv);
-		}catch (AnnotationParsingException e) {
-			logger.e(e.getMessage(), e.getElements());
-			return false;
-		}
-	}
+    private ProcessorLogger logger;
+    private Configuration cfg = new Configuration();
+    private List<ISchemaPlugin> plugins = new ArrayList<ISchemaPlugin>();
 
-	private boolean processTable(RoundEnvironment roundEnv) {
-		logger.i("SQLProcessor processTable");
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        logger = new ProcessorLogger(processingEnv.getMessager());
+        logger.i("init");
 
-		SchemaMeta schema;
-		Set<? extends Element> schemaElements = roundEnv.getElementsAnnotatedWith(Schema.class);
-		if(schemaElements != null && schemaElements.size() != 0){
-			if(schemaElements.size() != 1){
-				for(Element e : schemaElements){
-					logger.e("Please use one schema file", e);
-				}
-				return false;
-			}else{
-				Element e = schemaElements.iterator().next();
-				Schema schemaElement = e.getAnnotation(Schema.class);
-				if(TextUtils.isEmpty(schemaElement.className())){
-					logger.e("Schema name can't be empty", e);
-					return false;
-				}
-				schema = new SchemaMeta(e.getSimpleName().toString(), schemaElement.className(), e.getSimpleName().toString());
-				schema.setDbName(schemaElement.dbName());
-				schema.setDbVersion(schemaElement.dbVersion());
-				
-				PackageElement pkg = (PackageElement)e.getEnclosingElement();
-				String pkgName = pkg.getQualifiedName().toString();
-				logger.i("SQLProcessor pkgName found: " + pkgName);
-				schema.setPkgName(pkgName);
-				
-			}
-		}else{
-			 return false;
-		}
-		
-		ParserEnv parserEnv = new ParserEnv(schema.getStoreClassName());
-		
-		for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
-			if(!(element instanceof TypeElement))
+        cfg.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/res"));
+        Map<String, String> options = processingEnv.getOptions();
+        if (options != null) {
+            logger.i("init.options size = " + options.size());
+            for (Entry<String, String> e : options.entrySet()) {
+                logger.i("init.options " + e.getKey() + " = " + e.getValue());
+            }
+            if (options.containsKey(ARG_PLUGINS)) {
+                registerPlugins(processingEnv, options.get(ARG_PLUGINS));
+            }
+        }else{
+            logger.i("init.options EMPTY");
+        }
+    }
+
+    private void registerPlugins(ProcessingEnvironment processingEnv, String plugins) {
+        if (TextUtils.isEmpty(plugins)) {
+            return;
+        }
+        String[] ar = plugins.split(" ");
+        for (String s : ar) {
+            try {
+                Class<?> clazz = Class.forName(s);
+                if (!ISchemaPlugin.class.isAssignableFrom(clazz)) {
+                    logger.e("plugin " + s + " should extends ISchemaPlugin");
+                    continue;
+                }
+                logger.i("plugin " + s + " .newInstance");
+                ISchemaPlugin plugin = (ISchemaPlugin) clazz.newInstance();
+                logger.i("plugin " + s + " .newInstance end");
+                plugin.init(processingEnv, logger);
+                logger.i("plugin " + s + " .init end");
+                this.plugins.add(plugin);
+                logger.i("plugin " + s + " added");
+            } catch (ClassNotFoundException e) {
+                logger.e("Can't find plugin class: " + s, e);
                 continue;
-			logger.i("SQLProcessor table found: " + element.getSimpleName());
-            TypeElement typeElement = (TypeElement)element;
-			Table table = element.getAnnotation(Table.class);
-			TableResult tableInfo = new TableParser(typeElement, parserEnv, logger).parse();
+            } catch (InstantiationException e) {
+                logger.e("Can't instantiate plugin: " + s, e);
+                continue;
+            } catch (IllegalAccessException e) {
+                logger.e("Plugin should have open constructor: " + s, e);
+                continue;
+            }
+        }
+    }
 
-			schema.addTable(new TableMeta(table.value(), tableInfo.getSql()));
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        logger.i("SQLProcessor started");
+        if (annotations == null || annotations.size() == 0)
+            return false;
+        try {
+            return processTable(roundEnv);
+        } catch (AnnotationParsingException e) {
+            logger.e(e.getMessage(), e.getElements());
+            return false;
+        }
+    }
+
+    private boolean processTable(RoundEnvironment roundEnv) {
+        logger.i("SQLProcessor processTable");
+
+        SchemaMeta schema;
+        Element schemaElement;
+        Set<? extends Element> schemaElements = roundEnv.getElementsAnnotatedWith(Schema.class);
+        if (schemaElements != null && schemaElements.size() != 0) {
+            if (schemaElements.size() != 1) {
+                for (Element e : schemaElements) {
+                    logger.e("Please use one schema file", e);
+                }
+                return false;
+            } else {
+                schemaElement = schemaElements.iterator().next();
+                Schema schemaAnnotation = schemaElement.getAnnotation(Schema.class);
+                if (TextUtils.isEmpty(schemaAnnotation.className())) {
+                    logger.e("Schema name can't be empty", schemaElement);
+                    return false;
+                }
+                schema = new SchemaMeta(schemaElement.getSimpleName().toString(), schemaAnnotation.className(), schemaElement.getSimpleName().toString());
+                schema.setDbName(schemaAnnotation.dbName());
+                schema.setDbVersion(schemaAnnotation.dbVersion());
+
+                PackageElement pkg = (PackageElement) schemaElement.getEnclosingElement();
+                String pkgName = pkg.getQualifiedName().toString();
+                logger.i("SQLProcessor pkgName found: " + pkgName);
+                schema.setPkgName(pkgName);
+
+            }
+        } else {
+            return false;
+        }
+
+        ParserEnv parserEnv = new ParserEnv(schema.getStoreClassName());
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
+            if (!(element instanceof TypeElement))
+                continue;
+            logger.i("SQLProcessor table found: " + element.getSimpleName());
+            TypeElement typeElement = (TypeElement) element;
+
+            TableResult tableInfo = new TableParser(typeElement, parserEnv, logger).parse();
+
+            schema.addTable(new TableMeta(tableInfo.getTableName(), tableInfo.getSql()));
 
             List<IndexMeta> indexes = TableParser.proceedIndexes(typeElement);
-            if(indexes != null){
-                for(IndexMeta i : indexes){
+            if (indexes != null) {
+                for (IndexMeta i : indexes) {
                     schema.addIndex(i);
                 }
             }
-		}
+            processTableInPlugins(typeElement, tableInfo);
+        }
 
-		for(Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)){
-			logger.i("SQLProcessor simple view found: " + element.getSimpleName());
-			schema.addView(new SimpleViewParser(element, parserEnv).parse());
-		}
-		
-		for(Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)){
-			logger.i("SQLProcessor raw query found: " + element.getSimpleName());
-			schema.addQuery(new RawQueryParser(element, parserEnv).parse());
-		}
-		if(schema.isEmpty()){
-			return false;
-		}
-		processSchema(schema);
-		processSchemaExt(schema);
-		return true;
-	}
+        for (Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)) {
+            logger.i("SQLProcessor simple view found: " + element.getSimpleName());
+            ViewMeta viewMeta = new SimpleViewParser(element, parserEnv).parse();
+            schema.addView(viewMeta);
+            processViewInPlugins(element, viewMeta);
+        }
 
-	private void processSchema(SchemaMeta model) {
-		processTemplateForModel(model, "schema.ftl", null);
-	}
-	
-	private void processSchemaExt(SchemaMeta model) {
-		processTemplateForModel(model, "schema_extend.ftl", "2");
-	}
-	
-	private void processTemplateForModel(SchemaMeta model, String templateName, String postfix ) {
-		JavaFileObject file;
-		try {
-			file = processingEnv.getFiler().createSourceFile(model.getPkgName() + "." + model.getClassName() + (postfix  == null ? "" : postfix));
-			logger.i("Creating file:  " + model.getPkgName() + "." + file.getName());
-			Writer out = file.openWriter();
-			Template t = cfg.getTemplate(templateName);
-			t.process(model, out);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			logger.e("EntityProcessor IOException: ", e);
-		} catch (TemplateException e) {
-			logger.e("EntityProcessor TemplateException: ", e);
-		}
-	}
+        for (Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)) {
+            logger.i("SQLProcessor raw query found: " + element.getSimpleName());
+            ViewMeta rawMeta = new RawQueryParser(element, parserEnv).parse();
+            schema.addQuery(rawMeta);
+            processRawQueryInPlugins(element, rawMeta);
+        }
+        if (schema.isEmpty()) {
+            return false;
+        }
+        processSchema(schema);
+        processSchemaExt(schema);
+        processSchemaInPlugins(schemaElement, schema);
+        return true;
+    }
+
+    private void processSchema(SchemaMeta model) {
+        processTemplateForModel(model, "schema.ftl", null);
+    }
+
+    private void processSchemaExt(SchemaMeta model) {
+        processTemplateForModel(model, "schema_extend.ftl", "2");
+    }
+
+    private void processTemplateForModel(SchemaMeta model, String templateName, String postfix) {
+        JavaFileObject file;
+        try {
+            file = processingEnv.getFiler().createSourceFile(model.getPkgName() + "." + model.getClassName() + (postfix == null ? "" : postfix));
+            logger.i("Creating file:  " + model.getPkgName() + "." + file.getName());
+            Writer out = file.openWriter();
+            Template t = cfg.getTemplate(templateName);
+            t.process(model, out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            logger.e("EntityProcessor IOException: ", e);
+        } catch (TemplateException e) {
+            logger.e("EntityProcessor TemplateException: ", e);
+        }
+    }
+
+
+    private void processSchemaInPlugins(Element element, SchemaMeta model) {
+        logger.i("processSchemaInPlugins");
+        for (ISchemaPlugin plugin : plugins) {
+            plugin.processSchema(element, model);
+        }
+        logger.i("processSchemaInPlugins end");
+    }
+
+    private void processTableInPlugins(TypeElement element, TableResult tableInfo) {
+        logger.i("processTableInPlugins");
+        for (ISchemaPlugin plugin : plugins) {
+            plugin.processTable(element, tableInfo);
+        }
+        logger.i("processTableInPlugins end");
+    }
+
+    private void processViewInPlugins(Element element, ViewMeta tableInfo) {
+        logger.i("processViewInPlugins");
+        for (ISchemaPlugin plugin : plugins) {
+            plugin.processView(element, tableInfo);
+        }
+        logger.i("processViewInPlugins end");
+    }
+
+    private void processRawQueryInPlugins(Element element, ViewMeta tableInfo) {
+        for (ISchemaPlugin plugin : plugins) {
+            plugin.processRawQuery(element, tableInfo);
+        }
+    }
 }
