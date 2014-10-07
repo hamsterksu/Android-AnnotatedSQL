@@ -101,15 +101,16 @@ public class SimpleViewParser {
         TableColumns columns = new TableColumns(f.getSimpleName().toString(), true);
         for (ViewTableInfo t : viewMeta.getTables()) {
             for (ColumnMeta c : t.getColumns()) {
-                columns.add(t.getName(), c.variableName, c.alias);
+                columns.add(t.getName(), c.variableName, c.alias, c.sqlType, c.isNotNull);
             }
         }
         parserEnv.addTable(viewMeta.getViewName(), columns);
     }
 
     protected void handleFromResult(FromResult result, boolean toHead, int startSqlPos) {
-        if (result == null)
+        if (result == null) {
             return;
+        }
         if (result.getColumns() != null) {
             viewMeta.addTable(new ViewTableInfo(result.getAliasName(), result.getColumns()), toHead);
             if (toHead && select.length() > 0) {
