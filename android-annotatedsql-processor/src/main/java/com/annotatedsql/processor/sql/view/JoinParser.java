@@ -50,7 +50,7 @@ public class JoinParser extends ExcludeStaticWhereViewParser<FromResult, Join> {
             sql.append(" and ").append(where.copy(aliasName).getAsCondition());
         }
         List<ColumnMeta> columns = parseColumns();
-        return new FromResult(aliasName, sql.toString(), toSqlSelect(columns), columns, getExcludeStaticWhere());
+        return new FromResult(aliasName, annotation.joinTable(), sql.toString(), toSqlSelect(columns), columns, getExcludeStaticWhere());
     }
 
     @Override

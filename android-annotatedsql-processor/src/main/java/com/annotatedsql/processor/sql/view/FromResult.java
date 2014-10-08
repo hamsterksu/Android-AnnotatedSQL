@@ -8,6 +8,8 @@ import java.util.List;
 public class FromResult extends ParserResult{
 
 	private final String aliasName;
+
+    private final String tableName;
 	
 	private final String selectSql;
 	
@@ -15,9 +17,10 @@ public class FromResult extends ParserResult{
 
     private final String excludeStaticWhere;
 
-    public FromResult(String aliasName, String sql, String selectSql, List<ColumnMeta> columns, String excludeStaticWhere) {
+    public FromResult(String aliasName,String tableName, String sql, String selectSql, List<ColumnMeta> columns, String excludeStaticWhere) {
 		super(sql);
 		this.aliasName = aliasName;
+        this.tableName = tableName;
 		this.selectSql = selectSql;
 		this.columns = columns;
         this.excludeStaticWhere = excludeStaticWhere;
@@ -37,5 +40,9 @@ public class FromResult extends ParserResult{
 
     public String getExcludeStaticWhere() {
         return excludeStaticWhere;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 }

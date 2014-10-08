@@ -54,6 +54,8 @@ public class ViewMeta {
 	}
 	
 	public static class ViewTableInfo{
+
+        private final String tableName;
 		
 		private final String name;
 		
@@ -61,9 +63,10 @@ public class ViewMeta {
 		
 		private final List<ColumnMeta> columns;
 
-		public ViewTableInfo(String name, List<ColumnMeta> columns) {
+		public ViewTableInfo(String name, String tableName, List<ColumnMeta> columns) {
 			super();
 			this.name = name;
+            this.tableName = tableName;
 			this.className = TextUtils.var2class(name);
 			this.columns = columns;
 		}
@@ -79,5 +82,9 @@ public class ViewMeta {
 		public String getClassName() {
 			return className;
 		}
-	}
+
+        public String getTableName() {
+            return tableName;
+        }
+    }
 }
