@@ -5,5 +5,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 public @interface SimpleView {
-	String value();
+    String value();
 }

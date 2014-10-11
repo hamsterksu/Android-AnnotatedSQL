@@ -5,6 +5,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 public @interface Index {
-	String name();
-	String[] columns();
+    String name();
+
+    String[] columns();
 }

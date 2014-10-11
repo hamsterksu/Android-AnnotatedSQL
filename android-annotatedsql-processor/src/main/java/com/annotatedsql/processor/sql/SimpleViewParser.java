@@ -112,7 +112,7 @@ public class SimpleViewParser {
             return;
         }
         if (result.getColumns() != null) {
-            viewMeta.addTable(new ViewTableInfo(result.getAliasName(),result.getTableName(), result.getColumns()), toHead);
+            viewMeta.addTable(new ViewTableInfo(result.getAliasName(), result.getTableName(), result.getColumns()), toHead);
             if (toHead && select.length() > 0) {
                 select.insert(0, result.getSelectSql() + ", ");
             } else {

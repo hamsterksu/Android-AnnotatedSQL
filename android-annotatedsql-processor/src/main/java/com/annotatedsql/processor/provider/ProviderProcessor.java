@@ -73,23 +73,23 @@ public class ProviderProcessor extends AbstractProcessor {
     private boolean processProviders(RoundEnvironment roundEnv) {
         Set<? extends Element> providersElements = roundEnv.getElementsAnnotatedWith(Providers.class);
         if (providersElements != null && !providersElements.isEmpty()) {
-            if(providersElements.size() != 1){
+            if (providersElements.size() != 1) {
                 logger.e("Please use one @Providers", providersElements);
                 return false;
             }
             Element e = providersElements.iterator().next();
             Providers ps = e.getAnnotation(Providers.class);
-            if(ps == null){
+            if (ps == null) {
                 logger.e("ps is null", e);
                 return false;
             }
             Provider[] providers = ps.value();
-            if(providers == null || providers.length == 0){
+            if (providers == null || providers.length == 0) {
                 logger.e("No one provider defined in @Providers", e);
                 return false;
             }
             boolean b = true;
-            for(Provider p : providers){
+            for (Provider p : providers) {
                 b &= processProvider(roundEnv, e, p);
             }
             return b;
@@ -112,7 +112,7 @@ public class ProviderProcessor extends AbstractProcessor {
         if (e == null)
             return false;
 
-        if(providerElement == null) {
+        if (providerElement == null) {
             providerElement = e.getAnnotation(Provider.class);
         }
         if (TextUtils.isEmpty(providerElement.name())) {
@@ -134,7 +134,7 @@ public class ProviderProcessor extends AbstractProcessor {
 
         processSchema(roundEnv, provider);
 
-        logger.i("processProvider before generate: "+ provider.getClassName());
+        logger.i("processProvider before generate: " + provider.getClassName());
 
         processTemplateForModel(provider);
 

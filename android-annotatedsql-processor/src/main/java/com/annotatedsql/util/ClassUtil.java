@@ -15,35 +15,37 @@ import javax.lang.model.type.TypeMirror;
  */
 public final class ClassUtil {
 
-    private ClassUtil(){}
+    private ClassUtil() {
+    }
 
     /**
      * with inheritance
+     *
      * @param c
      * @return
      */
-    public static List<Element> getAllClassFields(TypeElement c){
+    public static List<Element> getAllClassFields(TypeElement c) {
         List<Element> fields = new ArrayList<Element>();
         collectParentFields(fields, Arrays.asList(c.asType()));
         return fields;
     }
 
-    public static void collectParentFields(List<Element> fields, List<? extends TypeMirror> typeMirrors){
-        if(typeMirrors == null || typeMirrors.isEmpty())
+    public static void collectParentFields(List<Element> fields, List<? extends TypeMirror> typeMirrors) {
+        if (typeMirrors == null || typeMirrors.isEmpty())
             return;
-        for(TypeMirror p : typeMirrors){
-            if(p instanceof NoType){
+        for (TypeMirror p : typeMirrors) {
+            if (p instanceof NoType) {
                 continue;
             }
-            Element superClass = ((DeclaredType)p).asElement();
+            Element superClass = ((DeclaredType) p).asElement();
             List<? extends Element> inner = superClass.getEnclosedElements();
-            if(inner != null){
+            if (inner != null) {
                 fields.addAll(inner);
             }
-            if(superClass instanceof TypeElement){
+            if (superClass instanceof TypeElement) {
                 TypeElement typeElement = ((TypeElement) superClass);
                 TypeMirror superclass = typeElement.getSuperclass();
-                if(superclass != null){
+                if (superclass != null) {
                     collectParentFields(fields, Arrays.asList(superclass));
                 }
                 collectParentFields(fields, typeElement.getInterfaces());

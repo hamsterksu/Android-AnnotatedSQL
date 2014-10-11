@@ -1,8 +1,6 @@
 package com.annotatedsql.processor.sql;
 
-import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.SchemaMeta;
-import com.annotatedsql.ftl.TableColumns;
 import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.ProcessorLogger;
 
@@ -17,6 +15,7 @@ public interface ISchemaPlugin {
 
     /**
      * execute in Processor.init method
+     *
      * @param processingEnv
      * @param logger
      */
@@ -24,6 +23,7 @@ public interface ISchemaPlugin {
 
     /**
      * execute after table parser
+     *
      * @param element
      * @param tableInfo
      */
@@ -31,6 +31,7 @@ public interface ISchemaPlugin {
 
     /**
      * execute after view parser
+     *
      * @param element
      * @param meta
      */
@@ -38,6 +39,7 @@ public interface ISchemaPlugin {
 
     /**
      * execute after raw query parser
+     *
      * @param element
      * @param meta
      */
@@ -45,6 +47,7 @@ public interface ISchemaPlugin {
 
     /**
      * execute in the end of generation, so you can create your files here
+     *
      * @param element
      * @param model
      */

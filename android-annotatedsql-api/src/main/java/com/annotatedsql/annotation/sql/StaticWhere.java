@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface StaticWhere {
     String column();
+
     String value();
 }

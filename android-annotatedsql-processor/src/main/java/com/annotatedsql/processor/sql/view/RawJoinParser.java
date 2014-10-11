@@ -13,46 +13,46 @@ import javax.lang.model.element.Element;
 
 public class RawJoinParser extends ViewTableColumnParser<FromResult, RawJoin> {
 
-	public RawJoinParser(ParserEnv parserEnv, SimpleViewParser parentParser,
-			Element f) {
-		super(parserEnv, parentParser, f, false);
-	}
+    public RawJoinParser(ParserEnv parserEnv, SimpleViewParser parentParser,
+                         Element f) {
+        super(parserEnv, parentParser, f, false);
+    }
 
-	@Override
-	public FromResult parse() {
-		if(TextUtils.isEmpty(annotation.onCondition())){
-			throw new AnnotationParsingException("'ON' condition is empty", field);
-		}
-		StringBuilder sql = new StringBuilder();
-		switch (annotation.type()) {
-			case INNER:
-				sql.append(" JOIN ");
-				break;
-			case LEFT:
-				sql.append(" LEFT OUTER JOIN ");
-				break;
-			case RIGHT:
-				sql.append(" RIGHT OUTER JOIN ");
-				break;
-			case CROSS:
-				sql.append(" CROSS JOIN ");
-				break;
-		}
-		
-		sql.append(annotation.joinTable()).append(" AS ").append(aliasName)
-			.append(" ON ").append(annotation.onCondition());
-		
-		List<ColumnMeta> columns = parseColumns();
-		return new FromResult(aliasName,annotation.joinTable(), sql.toString(), toSqlSelect(columns), columns, null);
-	}
+    @Override
+    public FromResult parse() {
+        if (TextUtils.isEmpty(annotation.onCondition())) {
+            throw new AnnotationParsingException("'ON' condition is empty", field);
+        }
+        StringBuilder sql = new StringBuilder();
+        switch (annotation.type()) {
+            case INNER:
+                sql.append(" JOIN ");
+                break;
+            case LEFT:
+                sql.append(" LEFT OUTER JOIN ");
+                break;
+            case RIGHT:
+                sql.append(" RIGHT OUTER JOIN ");
+                break;
+            case CROSS:
+                sql.append(" CROSS JOIN ");
+                break;
+        }
 
-	@Override
-	public Class<RawJoin> getAnnotationClass() {
-		return RawJoin.class;
-	}
+        sql.append(annotation.joinTable()).append(" AS ").append(aliasName)
+                .append(" ON ").append(annotation.onCondition());
 
-	@Override
-	public String parseTableName() {
-		return annotation.joinTable();
-	}
+        List<ColumnMeta> columns = parseColumns();
+        return new FromResult(aliasName, annotation.joinTable(), sql.toString(), toSqlSelect(columns), columns, null);
+    }
+
+    @Override
+    public Class<RawJoin> getAnnotationClass() {
+        return RawJoin.class;
+    }
+
+    @Override
+    public String parseTableName() {
+        return annotation.joinTable();
+    }
 }

@@ -5,15 +5,17 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 public @interface Join {
-	String joinTable();
-	String joinColumn();
-	
-	String onTableAlias();
-	String onColumn();
-	
-	Type type() default Type.INNER;
-	
-	public static enum Type{
-		INNER, LEFT, RIGHT, CROSS
-	}
+    String joinTable();
+
+    String joinColumn();
+
+    String onTableAlias();
+
+    String onColumn();
+
+    Type type() default Type.INNER;
+
+    public static enum Type {
+        INNER, LEFT, RIGHT, CROSS
+    }
 }

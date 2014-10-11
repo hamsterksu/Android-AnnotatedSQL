@@ -5,8 +5,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 public @interface Unique {
-	
-	ConflictType type() default ConflictType.REPLACE;
-	
-	enum ConflictType{ROLLBACK, ABORT, FAIL, IGNORE, REPLACE}
+
+    ConflictType type() default ConflictType.REPLACE;
+
+    enum ConflictType {ROLLBACK, ABORT, FAIL, IGNORE, REPLACE}
 }

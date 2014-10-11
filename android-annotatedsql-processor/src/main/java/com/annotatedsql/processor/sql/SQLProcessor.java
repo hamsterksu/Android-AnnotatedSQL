@@ -63,7 +63,7 @@ public class SQLProcessor extends AbstractProcessor {
             if (options.containsKey(ARG_PLUGINS)) {
                 registerPlugins(processingEnv, options.get(ARG_PLUGINS));
             }
-        }else{
+        } else {
             logger.i("init.options EMPTY");
         }
     }

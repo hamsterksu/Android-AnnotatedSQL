@@ -1,6 +1,5 @@
 package com.annotatedsql.util;
 
-import com.annotatedsql.AnnotationParsingException;
 import com.google.common.base.Joiner;
 
 import java.util.ArrayList;
@@ -16,11 +15,11 @@ public class Where {
 
     private String alias;
 
-    public Where(String alias){
+    public Where(String alias) {
         this.alias = alias;
     }
 
-    public Where copy(String newAlias){
+    public Where copy(String newAlias) {
         Where copy = new Where(newAlias);
         copy.where.addAll(this.where);
         copy.whereArgs.addAll(this.whereArgs);
@@ -46,8 +45,8 @@ public class Where {
 
     public String getAsCondition() {
         StringBuffer condition = new StringBuffer(128);
-        for(int i = 0; i < where.size(); i++){
-            if(i != 0){
+        for (int i = 0; i < where.size(); i++) {
+            if (i != 0) {
                 condition.append(" and ");
             }
             condition.append(alias).append('.').append(where.get(i).field).append(" = ").append(whereArgs.get(i).obj);
@@ -60,13 +59,13 @@ public class Where {
     }
 
     public Where exclude(String excludeWhere) {
-        if(TextUtils.isEmpty(excludeWhere))
+        if (TextUtils.isEmpty(excludeWhere))
             return this;
         Where copyWhere = new Where(this.alias);
-        for(int i = 0; i < where.size(); i++){
+        for (int i = 0; i < where.size(); i++) {
             WhereObject o = where.get(i);
             WhereArgObject arg = whereArgs.get(i);
-            if(!excludeWhere.equals(o.field)){
+            if (!excludeWhere.equals(o.field)) {
                 copyWhere.add(o.field, arg.obj);
             }
         }

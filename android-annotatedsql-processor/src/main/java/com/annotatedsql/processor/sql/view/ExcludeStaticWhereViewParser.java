@@ -12,13 +12,13 @@ import javax.lang.model.element.Element;
 /**
  * Created by hamsterksu on 02.04.14.
  */
-public abstract class ExcludeStaticWhereViewParser<T extends ParserResult, A extends Annotation> extends ViewTableColumnParser<T, A>{
+public abstract class ExcludeStaticWhereViewParser<T extends ParserResult, A extends Annotation> extends ViewTableColumnParser<T, A> {
 
     public ExcludeStaticWhereViewParser(ParserEnv parserEnv, SimpleViewParser parentParser, Element f, boolean ignoreId) {
         super(parserEnv, parentParser, f, ignoreId);
     }
 
-    public String getExcludeStaticWhere(){
+    public String getExcludeStaticWhere() {
         ExcludeStaticWhere excludeAnn = field.getAnnotation(ExcludeStaticWhere.class);
         return excludeAnn == null ? null : excludeAnn.value();
     }
