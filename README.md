@@ -44,6 +44,7 @@ Very easy way to add annotation processors to your andorid project - just use [a
 * support plugins
 * custom mime type for @Uri
 * reformat code: use whitespaces instead tab
+
 ######version 1.9.0
 * bulkinsert: support 2 modes: replace and insert
 * insert: support all conflict resolution modes
