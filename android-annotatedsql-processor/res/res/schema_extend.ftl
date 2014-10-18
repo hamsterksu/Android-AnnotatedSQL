@@ -8,31 +8,31 @@ package ${pkgName};
 import ${pkgName}.${storeClassName}.*;
 
 public interface ${className}2 {
-	<#list views as view>
+    <#list views as view>
 
-	public static interface ${view.viewClassName}2 {
-		<#list view.tables as subTable>
-		
-		public static interface ${subTable.className} {
-			<#list subTable.columns as c>
-			String ${c.variableName} = ${c.variableAlias};
-			</#list>
-		} 
-		</#list>
-	} 
-	</#list>
-	<#list queries as q>
-		<#if q.hasSubTables>
-	public static interface ${q.viewClassName}2 {
-			<#list q.tables as subTable>
-			
-		public static interface ${subTable.className} {
-			<#list subTable.columns as c>
-			String ${c.variableName} = ${c.variableAlias};
-			</#list>
-		} 
-			</#list>
-	}
-		</#if> 
-	</#list>
+    public static interface ${view.viewClassName}2 {
+        <#list view.tables as subTable>
+        
+        public static interface ${subTable.className} {
+            <#list subTable.columns as c>
+            String ${c.variableName} = ${c.variableAlias};
+            </#list>
+        } 
+        </#list>
+    } 
+    </#list>
+    <#list queries as q>
+        <#if q.hasSubTables>
+    public static interface ${q.viewClassName}2 {
+            <#list q.tables as subTable>
+            
+        public static interface ${subTable.className} {
+            <#list subTable.columns as c>
+            String ${c.variableName} = ${c.variableAlias};
+            </#list>
+        } 
+            </#list>
+    }
+        </#if> 
+    </#list>
 }

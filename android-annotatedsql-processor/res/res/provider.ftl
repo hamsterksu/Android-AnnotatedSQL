@@ -6,7 +6,7 @@
 package ${pkgName};
 
 <#list imports as import>
-import ${import};	 
+import ${import};     
 </#list> 
 
 import java.util.ArrayList;
@@ -38,154 +38,154 @@ public class ${className} extends ContentProvider{
         INSERT, REPLACE
     }
 
-	public static final String AUTHORITY = "${authority}";
+    public static final String AUTHORITY = "${authority}";
 
     @Deprecated
-	public static final String FRAGMENT_NO_NOTIFY = UriBuilder.FRAGMENT_NO_NOTIFY;
+    public static final String FRAGMENT_NO_NOTIFY = UriBuilder.FRAGMENT_NO_NOTIFY;
 
     @Deprecated
-	public static final String QUERY_LIMIT = UriBuilder.QUERY_LIMIT;
+    public static final String QUERY_LIMIT = UriBuilder.QUERY_LIMIT;
 
     @Deprecated
-	public static final String QUERY_GROUP_BY = UriBuilder.QUERY_GROUP_BY;
+    public static final String QUERY_GROUP_BY = UriBuilder.QUERY_GROUP_BY;
 
-	public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
+    public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
 
-	protected final static int MATCH_TYPE_ITEM = 0x0001;
-	protected final static int MATCH_TYPE_DIR = 0x0002;
-	protected final static int MATCH_TYPE_MASK = 0x000f;
-	
-	<#list entities as e>
-	protected final static int MATCH_${getMathcName(e.path)} = ${e.codeHex};
-	</#list>
-	
-	protected static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+    protected final static int MATCH_TYPE_ITEM = 0x0001;
+    protected final static int MATCH_TYPE_DIR = 0x0002;
+    protected final static int MATCH_TYPE_MASK = 0x000f;
+    
+    <#list entities as e>
+    protected final static int MATCH_${getMathcName(e.path)} = ${e.codeHex};
+    </#list>
+    
+    protected static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-	static {
-		<#list entities as e>
-		matcher.addURI(AUTHORITY, ${e.path}, MATCH_${getMathcName(e.path)}); 
-		</#list> 
-	}
-	
-	protected SQLiteOpenHelper dbHelper;
-	protected ContentResolver contentResolver;
+    static {
+        <#list entities as e>
+        matcher.addURI(AUTHORITY, ${e.path}, MATCH_${getMathcName(e.path)}); 
+        </#list> 
+    }
+    
+    protected SQLiteOpenHelper dbHelper;
+    protected ContentResolver contentResolver;
 
     protected BulkInsertConflictMode defaultBulkInsertConflictMode = BulkInsertConflictMode.${bulkInsertMode};
     protected int defaultInsertConflictMode = ${insertMode};
 
-	@Override
-	public boolean onCreate() {
-		final Context context = getContext();
-		<#if generateHelper>
-		dbHelper = new AnnotationSql(context);
-		<#else>
-		dbHelper = new ${openHelperClass}(context);
-		</#if>
-		contentResolver = context.getContentResolver();
-		return true;
-	}
-	
-	@Override
-	public String getType(Uri uri) {
-		final String type;
-		switch (matcher.match(uri) & MATCH_TYPE_MASK) {
-			case MATCH_TYPE_ITEM:
-				type = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + AUTHORITY + ".item";
-				break;
-			case MATCH_TYPE_DIR:
-				type = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd." + AUTHORITY + ".dir";
-				break;
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
-			}
-		return type;
-	}
+    @Override
+    public boolean onCreate() {
+        final Context context = getContext();
+        <#if generateHelper>
+        dbHelper = new AnnotationSql(context);
+        <#else>
+        dbHelper = new ${openHelperClass}(context);
+        </#if>
+        contentResolver = context.getContentResolver();
+        return true;
+    }
+    
+    @Override
+    public String getType(Uri uri) {
+        final String type;
+        switch (matcher.match(uri) & MATCH_TYPE_MASK) {
+            case MATCH_TYPE_ITEM:
+                type = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + AUTHORITY + ".item";
+                break;
+            case MATCH_TYPE_DIR:
+                type = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd." + AUTHORITY + ".dir";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported uri " + uri);
+            }
+        return type;
+    }
 
-	@Override
-	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-		final SQLiteQueryBuilder query = new SQLiteQueryBuilder();
-		switch (matcher.match(uri)) {
-			<#list entities as e>
-			case MATCH_${getMathcName(e.path)}:{
-			<#if e.rawQuery>
-				Cursor c = dbHelper.getReadableDatabase().rawQuery(${schemaClassName}.${e.tableLink?upper_case}
-					+ (TextUtils.isEmpty(selection) ? "" : " where " + selection) 
-					+ (TextUtils.isEmpty(sortOrder) ? "" : " order by " + sortOrder)
-					, selectionArgs);
-				c.setNotificationUri(getContext().getContentResolver(), uri);
-				return c;  
-			<#else>
-				query.setTables(${e.tableLink});
-				<#if e.item && e.where >
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        final SQLiteQueryBuilder query = new SQLiteQueryBuilder();
+        switch (matcher.match(uri)) {
+            <#list entities as e>
+            case MATCH_${getMathcName(e.path)}:{
+            <#if e.rawQuery>
+                Cursor c = dbHelper.getReadableDatabase().rawQuery(${schemaClassName}.${e.tableLink?upper_case}
+                    + (TextUtils.isEmpty(selection) ? "" : " where " + selection) 
+                    + (TextUtils.isEmpty(sortOrder) ? "" : " order by " + sortOrder)
+                    , selectionArgs);
+                c.setNotificationUri(getContext().getContentResolver(), uri);
+                return c;  
+            <#else>
+                query.setTables(${e.tableLink});
+                <#if e.item && e.where >
                 selection = concatenateWhere(selection, "${e.selectColumn} = ? and ${e.queryWhere}");
                 selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment(), ${e.whereArgs}});
-				<#elseif e.item>
-				selection = concatenateWhere(selection, "${e.selectColumn} = ?");
-				selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment()});
-				<#elseif e.where>
-				selection = concatenateWhere(selection, "${e.queryWhere}");
-				selectionArgs = appendSelectionArgs(selectionArgs, new String[]{${e.whereArgs}});
-				</#if>
-				break;
-			</#if>
-			}
-			</#list> 
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
-		}
-		Cursor c = query.query(dbHelper.getReadableDatabase(),
-        		projection, selection, selectionArgs,
-        		UriBuilder.getGroupBy(uri),
-        		null, sortOrder,
-        		UriBuilder.getLimit(uri));
-		c.setNotificationUri(getContext().getContentResolver(), uri);
-		
-		return c;
-	}
+                <#elseif e.item>
+                selection = concatenateWhere(selection, "${e.selectColumn} = ?");
+                selectionArgs = appendSelectionArgs(selectionArgs, new String[]{uri.getLastPathSegment()});
+                <#elseif e.where>
+                selection = concatenateWhere(selection, "${e.queryWhere}");
+                selectionArgs = appendSelectionArgs(selectionArgs, new String[]{${e.whereArgs}});
+                </#if>
+                break;
+            </#if>
+            }
+            </#list> 
+            default:
+                throw new IllegalArgumentException("Unsupported uri " + uri);
+        }
+        Cursor c = query.query(dbHelper.getReadableDatabase(),
+                projection, selection, selectionArgs,
+                UriBuilder.getGroupBy(uri),
+                null, sortOrder,
+                UriBuilder.getLimit(uri));
+        c.setNotificationUri(getContext().getContentResolver(), uri);
+        
+        return c;
+    }
 
 <#if supportTransaction>
-	@Override
-	public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
-		SQLiteDatabase sql = dbHelper.getWritableDatabase();
-		sql.beginTransaction();
-		ContentProviderResult[] res = null;
-		try{
-			res = super.applyBatch(operations);
-			sql.setTransactionSuccessful();
-		}finally{
-			sql.endTransaction();
-		}
-		return res;
-	}
+    @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+        SQLiteDatabase sql = dbHelper.getWritableDatabase();
+        sql.beginTransaction();
+        ContentProviderResult[] res = null;
+        try{
+            res = super.applyBatch(operations);
+            sql.setTransactionSuccessful();
+        }finally{
+            sql.endTransaction();
+        }
+        return res;
+    }
 
-	
+    
     @Override
     public int bulkInsert(Uri uri, ContentValues[] valuesAr) {
-    	final String table;
-		
-		switch(matcher.match(uri)){
-			<#list entities as e>
-			<#if !e.item && !e.onlyQuery>
-			case MATCH_${getMathcName(e.path)}:{
-				table = ${e.tableLink};
-				break;
-			}
-			</#if>
-			</#list> 
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
-		}
+        final String table;
+        
+        switch(matcher.match(uri)){
+            <#list entities as e>
+            <#if !e.item && !e.onlyQuery>
+            case MATCH_${getMathcName(e.path)}:{
+                table = ${e.tableLink};
+                break;
+            }
+            </#if>
+            </#list> 
+            default:
+                throw new IllegalArgumentException("Unsupported uri " + uri);
+        }
 
         BulkInsertConflictMode conflict = UriBuilder.getBulkInsertConflictMode(uri, defaultBulkInsertConflictMode);
-		SQLiteDatabase sql = dbHelper.getWritableDatabase();
-		sql.beginTransaction();
-		int count = 0;
-		try {
-			InsertHelper ih = new InsertHelper(sql, table);
-			for (ContentValues values : valuesAr) {
-			<#list entities as e>
-				<@addInsertBeforeTrigger uri=e />
-			</#list>
+        SQLiteDatabase sql = dbHelper.getWritableDatabase();
+        sql.beginTransaction();
+        int count = 0;
+        try {
+            InsertHelper ih = new InsertHelper(sql, table);
+            for (ContentValues values : valuesAr) {
+            <#list entities as e>
+                <@addInsertBeforeTrigger uri=e />
+            </#list>
                 long id;
                 if(conflict == BulkInsertConflictMode.REPLACE) {
                     id = ih.replace(values);
@@ -195,186 +195,186 @@ public class ${className} extends ContentProvider{
                 if(id != -1) {
                     count++;
                 }
-			}
-			ih.close();
-			sql.setTransactionSuccessful();
-			<#list entities as e>
-				<@addInsertAfterTrigger uri=e />
-			</#list>
-		} finally {
-			sql.endTransaction();
-		}
-		
-		if (!UriBuilder.isIgnoreNotify(uri)) {
-			notifyUri(contentResolver, uri);
-		}
-    	return count;
+            }
+            ih.close();
+            sql.setTransactionSuccessful();
+            <#list entities as e>
+                <@addInsertAfterTrigger uri=e />
+            </#list>
+        } finally {
+            sql.endTransaction();
+        }
+        
+        if (!UriBuilder.isIgnoreNotify(uri)) {
+            notifyUri(contentResolver, uri);
+        }
+        return count;
     }
 
 </#if>
 
-	@Override
-	@SuppressWarnings("unused")
-	public Uri insert(Uri uri, ContentValues values) {
-		final String table;
-		
-		switch(matcher.match(uri)){
-			<#list entities as e>
-			<#if !e.item && !e.onlyQuery>
-			case MATCH_${getMathcName(e.path)}:{
-				table = ${e.tableLink};
-				break;
-			}
-			</#if>
-			</#list> 
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
-		}
-		<#list entities as e>
-			<@addInsertBeforeTrigger uri=e />
-		</#list>
+    @Override
+    @SuppressWarnings("unused")
+    public Uri insert(Uri uri, ContentValues values) {
+        final String table;
+        
+        switch(matcher.match(uri)){
+            <#list entities as e>
+            <#if !e.item && !e.onlyQuery>
+            case MATCH_${getMathcName(e.path)}:{
+                table = ${e.tableLink};
+                break;
+            }
+            </#if>
+            </#list> 
+            default:
+                throw new IllegalArgumentException("Unsupported uri " + uri);
+        }
+        <#list entities as e>
+            <@addInsertBeforeTrigger uri=e />
+        </#list>
         int conflictMode = UriBuilder.getInsertConflictMode(uri, defaultInsertConflictMode);
         long id = dbHelper.getWritableDatabase().insertWithOnConflict(table, null, values, conflictMode);
-		<#list entities as e>
-			<@addInsertAfterTrigger uri=e />
-		</#list>
-		if(!UriBuilder.isIgnoreNotify(uri)){
-			notifyUri(contentResolver, uri);
-		}
-		return Uri.withAppendedPath(uri, String.valueOf(id));
-	}
+        <#list entities as e>
+            <@addInsertAfterTrigger uri=e />
+        </#list>
+        if(!UriBuilder.isIgnoreNotify(uri)){
+            notifyUri(contentResolver, uri);
+        }
+        return Uri.withAppendedPath(uri, String.valueOf(id));
+    }
 
-	@Override
-	@SuppressWarnings("unused")
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		final String table;
+    @Override
+    @SuppressWarnings("unused")
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        final String table;
         String processedSelection = selection;
         
-		switch(matcher.match(uri)){
-			<#list entities as e>
-			<#if !e.onlyQuery>
-			case MATCH_${getMathcName(e.path)}:{
-				table = ${e.tableLink};
-				<#if e.item>
-				processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
-				</#if>
-				break;
-			}
-			</#if>
-			</#list> 
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
-		}
-		<#list entities as e>
-			<@addUpdateBeforeTrigger uri=e />
-		</#list>
-		int count = dbHelper.getWritableDatabase().update(table, values, processedSelection, selectionArgs);
-		<#list entities as e>
-			<@addUpdateAfterTrigger uri=e />
-		</#list>
-		if(!UriBuilder.isIgnoreNotify(uri)){
-			notifyUri(contentResolver, uri);
-		}
-		
-		return count;
-	}
-	
-	@Override
-	@SuppressWarnings("unused")
-	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		final String table;
+        switch(matcher.match(uri)){
+            <#list entities as e>
+            <#if !e.onlyQuery>
+            case MATCH_${getMathcName(e.path)}:{
+                table = ${e.tableLink};
+                <#if e.item>
+                processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
+                </#if>
+                break;
+            }
+            </#if>
+            </#list> 
+            default:
+                throw new IllegalArgumentException("Unsupported uri " + uri);
+        }
+        <#list entities as e>
+            <@addUpdateBeforeTrigger uri=e />
+        </#list>
+        int count = dbHelper.getWritableDatabase().update(table, values, processedSelection, selectionArgs);
+        <#list entities as e>
+            <@addUpdateAfterTrigger uri=e />
+        </#list>
+        if(!UriBuilder.isIgnoreNotify(uri)){
+            notifyUri(contentResolver, uri);
+        }
+        
+        return count;
+    }
+    
+    @Override
+    @SuppressWarnings("unused")
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        final String table;
         String processedSelection = selection;
         
-		switch(matcher.match(uri)){
-			<#list entities as e>
-			<#if !e.onlyQuery>
-			case MATCH_${getMathcName(e.path)}:{
-				table = ${e.tableLink};
-				<#if e.item>
-				processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
-				</#if>
-				break;
-			}
-			</#if>
-			</#list> 
-			default:
-				throw new IllegalArgumentException("Unsupported uri " + uri);
-		}
-		<#list entities as e>
-			<@addDeleteBeforeTrigger uri=e />
-		</#list>
-		int count = dbHelper.getWritableDatabase().delete(table, processedSelection, selectionArgs);
-		<#list entities as e>
-			<@addDeleteAfterTrigger uri=e />
-		</#list>
-		if(!UriBuilder.isIgnoreNotify(uri)){
-			notifyUri(contentResolver, uri);
-		}
-		return count;
-	}
-	<#list entities as e>
-		<#if e.triggered>
-			<#list e.triggers as trigger>
-				<#if trigger.insert && trigger.before>
-			
-	protected void on${trigger.methodName?cap_first}BeforeInserted(ContentValues values){
-		
-	}
-				</#if>			
-				<#if trigger.insert && trigger.after>
-			
-	protected void on${trigger.methodName?cap_first}AfterInserted(ContentValues values){
-		
-	}
-				</#if>
-			<#if trigger.delete && trigger.before>
-			
-	protected void on${trigger.methodName?cap_first}BeforeDeleted(Uri uri, String selection, String[] selectionArgs){
-		
-	}
-			</#if>
-			<#if trigger.delete && trigger.after>
-			
-	protected void on${trigger.methodName?cap_first}AfterDeleted(Uri uri, String selection, String[] selectionArgs){
-		
-	}
-			</#if>
-			<#if trigger.update && trigger.before>
-			
-	protected void on${trigger.methodName?cap_first}BeforeUpdated(Uri uri, ContentValues values, String selection, String[] selectionArg){
-		
-	}
-			</#if>
-			<#if trigger.update && trigger.after>
-			
-	protected void on${trigger.methodName?cap_first}AfterUpdated(Uri uri, ContentValues values, String selection, String[] selectionArg){
-		
-	}
-			</#if>
-			</#list>
-		</#if>
-	</#list>
-	
-	public static void notifyUri(ContentResolver cr, Uri uri){
-		cr.notifyChange(uri, null);
-		switch(matcher.match(uri)){
-			<#list entities as e>
-			<#if (e.hasAltNotify)>
-			case MATCH_${getMathcName(e.path)}:{
-				
-				<#list e.altNotify as alt>
-					<#if e.item && alt.itemizedAltNotify>
-				cr.notifyChange(getContentUri("${alt.value}", uri.getLastPathSegment()), null);
-					<#else>
-				cr.notifyChange(getContentUri("${alt.value}"), null);
-					</#if>
-				</#list>
-				break;
-			}
-			</#if>
-			</#list> 
-		}
-	}
+        switch(matcher.match(uri)){
+            <#list entities as e>
+            <#if !e.onlyQuery>
+            case MATCH_${getMathcName(e.path)}:{
+                table = ${e.tableLink};
+                <#if e.item>
+                processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
+                </#if>
+                break;
+            }
+            </#if>
+            </#list> 
+            default:
+                throw new IllegalArgumentException("Unsupported uri " + uri);
+        }
+        <#list entities as e>
+            <@addDeleteBeforeTrigger uri=e />
+        </#list>
+        int count = dbHelper.getWritableDatabase().delete(table, processedSelection, selectionArgs);
+        <#list entities as e>
+            <@addDeleteAfterTrigger uri=e />
+        </#list>
+        if(!UriBuilder.isIgnoreNotify(uri)){
+            notifyUri(contentResolver, uri);
+        }
+        return count;
+    }
+    <#list entities as e>
+        <#if e.triggered>
+            <#list e.triggers as trigger>
+                <#if trigger.insert && trigger.before>
+            
+    protected void on${trigger.methodName?cap_first}BeforeInserted(ContentValues values){
+        
+    }
+                </#if>            
+                <#if trigger.insert && trigger.after>
+            
+    protected void on${trigger.methodName?cap_first}AfterInserted(ContentValues values){
+        
+    }
+                </#if>
+            <#if trigger.delete && trigger.before>
+            
+    protected void on${trigger.methodName?cap_first}BeforeDeleted(Uri uri, String selection, String[] selectionArgs){
+        
+    }
+            </#if>
+            <#if trigger.delete && trigger.after>
+            
+    protected void on${trigger.methodName?cap_first}AfterDeleted(Uri uri, String selection, String[] selectionArgs){
+        
+    }
+            </#if>
+            <#if trigger.update && trigger.before>
+            
+    protected void on${trigger.methodName?cap_first}BeforeUpdated(Uri uri, ContentValues values, String selection, String[] selectionArg){
+        
+    }
+            </#if>
+            <#if trigger.update && trigger.after>
+            
+    protected void on${trigger.methodName?cap_first}AfterUpdated(Uri uri, ContentValues values, String selection, String[] selectionArg){
+        
+    }
+            </#if>
+            </#list>
+        </#if>
+    </#list>
+    
+    public static void notifyUri(ContentResolver cr, Uri uri){
+        cr.notifyChange(uri, null);
+        switch(matcher.match(uri)){
+            <#list entities as e>
+            <#if (e.hasAltNotify)>
+            case MATCH_${getMathcName(e.path)}:{
+                
+                <#list e.altNotify as alt>
+                    <#if e.item && alt.itemizedAltNotify>
+                cr.notifyChange(getContentUri("${alt.value}", uri.getLastPathSegment()), null);
+                    <#else>
+                cr.notifyChange(getContentUri("${alt.value}"), null);
+                    </#if>
+                </#list>
+                break;
+            }
+            </#if>
+            </#list> 
+        }
+    }
 
     @Deprecated
     protected static boolean ignoreNotify(Uri uri){
@@ -557,27 +557,27 @@ public class ${className} extends ContentProvider{
             return uri.getQueryParameter(QUERY_GROUP_BY);
         }
     }
-	
-	<#if generateHelper>   
-	protected class AnnotationSql extends SQLiteOpenHelper {
+    
+    <#if generateHelper>   
+    protected class AnnotationSql extends SQLiteOpenHelper {
 
-		public AnnotationSql(Context context) {
-			super(context, ${schemaClassName}.DB_NAME, null, ${schemaClassName}.DB_VERSION);
-		}
+        public AnnotationSql(Context context) {
+            super(context, ${schemaClassName}.DB_NAME, null, ${schemaClassName}.DB_VERSION);
+        }
 
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-			${schemaClassName}.onCreate(db);
-		}
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            ${schemaClassName}.onCreate(db);
+        }
 
-		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			${schemaClassName}.onDrop(db);
-			onCreate(db);
-		}
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            ${schemaClassName}.onDrop(db);
+            onCreate(db);
+        }
 
-	}
-	</#if>
+    }
+    </#if>
 
     public static String composeIdSelection(String originalSelection, String id, String idColumn) {
         StringBuffer sb = new StringBuffer();

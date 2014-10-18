@@ -9,51 +9,51 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class ${className}{
 
-	public static final String DB_NAME = "${dbName}";
-	public static final int DB_VERSION = ${dbVersion};
-	
-	//tables	 
-	<#list tables as table>
-	public static final String SQL_CREATE_${table.tableName?upper_case} = "${table.sql}";
-	 
-	</#list>
-	//indexes 
-	<#list indexes as index>
-	public static final String SQL_CREATE_${index.indexName?upper_case} = "${index.sql}";
-	 
-	</#list>
-	//views
-	<#list views as view>
-	public static final String SQL_CREATE_${view.viewName?upper_case} = "${view.sql}";
-	 
-	</#list>
-	//queries	
-	<#list queries as q>
-	public static final String SQL_QUERY_${q.viewName?upper_case} = "${q.sql}";
-	 
-	</#list>
-	
-	public static void onCreate(final SQLiteDatabase db) {
-		<#list tables as table>
-		db.execSQL(SQL_CREATE_${table.tableName?upper_case});
-		</#list>
-		
-		<#list indexes as index>
-		db.execSQL(SQL_CREATE_${index.indexName?upper_case});
-		</#list>
-		
-		<#list views as view>
-		db.execSQL(SQL_CREATE_${view.viewName?upper_case});
-		</#list>
-	}
-	
-	public static void onDrop(final SQLiteDatabase db){
-		<#list tables as table>
-		db.execSQL("drop table if exists ${table.tableName}");
-		</#list>
-		
-		<#list views as view>
-		db.execSQL("drop view if exists ${view.viewName}");
-		</#list>
-	}
+    public static final String DB_NAME = "${dbName}";
+    public static final int DB_VERSION = ${dbVersion};
+    
+    //tables     
+    <#list tables as table>
+    public static final String SQL_CREATE_${table.tableName?upper_case} = "${table.sql}";
+     
+    </#list>
+    //indexes 
+    <#list indexes as index>
+    public static final String SQL_CREATE_${index.indexName?upper_case} = "${index.sql}";
+     
+    </#list>
+    //views
+    <#list views as view>
+    public static final String SQL_CREATE_${view.viewName?upper_case} = "${view.sql}";
+     
+    </#list>
+    //queries    
+    <#list queries as q>
+    public static final String SQL_QUERY_${q.viewName?upper_case} = "${q.sql}";
+     
+    </#list>
+    
+    public static void onCreate(final SQLiteDatabase db) {
+        <#list tables as table>
+        db.execSQL(SQL_CREATE_${table.tableName?upper_case});
+        </#list>
+        
+        <#list indexes as index>
+        db.execSQL(SQL_CREATE_${index.indexName?upper_case});
+        </#list>
+        
+        <#list views as view>
+        db.execSQL(SQL_CREATE_${view.viewName?upper_case});
+        </#list>
+    }
+    
+    public static void onDrop(final SQLiteDatabase db){
+        <#list tables as table>
+        db.execSQL("drop table if exists ${table.tableName}");
+        </#list>
+        
+        <#list views as view>
+        db.execSQL("drop view if exists ${view.viewName}");
+        </#list>
+    }
 }
