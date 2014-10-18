@@ -1,4 +1,4 @@
-<#function getMathcName path>
+<#function getMatchName path>
     <#return path?upper_case?replace(".", "_")?replace(" + \"/#\"", "_ITEM")>
 </#function>
 

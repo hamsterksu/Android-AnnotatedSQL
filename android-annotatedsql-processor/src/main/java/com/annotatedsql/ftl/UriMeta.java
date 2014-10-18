@@ -21,8 +21,9 @@ public class UriMeta {
     private final boolean rawQuery;
 
     private final Where where;
+    private final String customMimeType;
 
-    public UriMeta(String path, int code, boolean isItem, String selectColumn, String tableLink, String[] altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery, Where where) {
+    public UriMeta(String path, int code, boolean isItem, String customMimeType, String selectColumn, String tableLink, String[] altNotify, boolean onlyQuery, List<TriggerMeta> triggers, boolean rawQuery, Where where) {
         super();
         this.path = path;
         this.code = code;
@@ -33,7 +34,8 @@ public class UriMeta {
         this.triggers = triggers;
         this.rawQuery = rawQuery;
         this.where = where;
-        codeHex = "0x" + Integer.toHexString(code);
+        this.codeHex = "0x" + Integer.toHexString(code);
+        this.customMimeType = customMimeType;
 
         if (altNotify != null && altNotify.length != 0) {
             this.altNotify = new ArrayList<AltNotify>();
@@ -107,5 +109,13 @@ public class UriMeta {
     public String getWhereArgs() {
         assert where != null;
         return where.getWhereArgs();
+    }
+
+    public String getCustomMimeType() {
+        return customMimeType;
+    }
+
+    public boolean isHasCustomMimeType() {
+        return !TextUtils.isEmpty(customMimeType);
     }
 }

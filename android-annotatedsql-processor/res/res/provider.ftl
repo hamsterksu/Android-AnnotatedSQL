@@ -28,11 +28,14 @@ import android.net.Uri;
 import android.net.Uri.Builder;
 import android.text.TextUtils;
 import android.util.Log;
-
+import android.util.SparseArray;
 
 public class ${className} extends ContentProvider{
 
     public static final String TAG = ${className}.class.getSimpleName();
+
+    public static final String SUBTYPE_ITEM = ".item";
+    public static final String SUBTYPE_DIR = ".dir";
 
     public static enum BulkInsertConflictMode {
         INSERT, REPLACE
@@ -53,20 +56,32 @@ public class ${className} extends ContentProvider{
 
     protected final static int MATCH_TYPE_ITEM = 0x0001;
     protected final static int MATCH_TYPE_DIR = 0x0002;
+    protected final static int MATCH_TYPE_CUSTOM = 0x0003;
     protected final static int MATCH_TYPE_MASK = 0x000f;
-    
+
     <#list entities as e>
-    protected final static int MATCH_${getMathcName(e.path)} = ${e.codeHex};
+    protected final static int MATCH_${getMatchName(e.path)} = ${e.codeHex};
     </#list>
-    
+
     protected static final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+    protected static final SparseArray<String> customTypes = new SparseArray<String>();
 
     static {
         <#list entities as e>
-        matcher.addURI(AUTHORITY, ${e.path}, MATCH_${getMathcName(e.path)}); 
-        </#list> 
+        matcher.addURI(AUTHORITY, ${e.path}, MATCH_${getMatchName(e.path)});
+        </#list>
+
+        <#list entities as e>
+            <#if e.hasCustomMimeType>
+                <#if e.item>
+        customTypes.put(MATCH_${getMatchName(e.path)}, "${e.customMimeType}" + SUBTYPE_ITEM);
+                <#else>
+        customTypes.put(MATCH_${getMatchName(e.path)}, "${e.customMimeType}" + SUBTYPE_DIR);
+                </#if>
+            </#if>
+        </#list>
     }
-    
+
     protected SQLiteOpenHelper dbHelper;
     protected ContentResolver contentResolver;
 
@@ -88,12 +103,16 @@ public class ${className} extends ContentProvider{
     @Override
     public String getType(Uri uri) {
         final String type;
-        switch (matcher.match(uri) & MATCH_TYPE_MASK) {
+        final int code = matcher.match(uri);
+        switch (code & MATCH_TYPE_MASK) {
             case MATCH_TYPE_ITEM:
-                type = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + AUTHORITY + ".item";
+                type = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + AUTHORITY + SUBTYPE_ITEM;
                 break;
             case MATCH_TYPE_DIR:
-                type = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd." + AUTHORITY + ".dir";
+                type = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd." + AUTHORITY + SUBTYPE_DIR;
+                break;
+            case MATCH_TYPE_CUSTOM:
+                type = customTypes.get(code);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported uri " + uri);
@@ -106,7 +125,7 @@ public class ${className} extends ContentProvider{
         final SQLiteQueryBuilder query = new SQLiteQueryBuilder();
         switch (matcher.match(uri)) {
             <#list entities as e>
-            case MATCH_${getMathcName(e.path)}:{
+            case MATCH_${getMatchName(e.path)}:{
             <#if e.rawQuery>
                 Cursor c = dbHelper.getReadableDatabase().rawQuery(${schemaClassName}.${e.tableLink?upper_case}
                     + (TextUtils.isEmpty(selection) ? "" : " where " + selection) 
@@ -166,7 +185,7 @@ public class ${className} extends ContentProvider{
         switch(matcher.match(uri)){
             <#list entities as e>
             <#if !e.item && !e.onlyQuery>
-            case MATCH_${getMathcName(e.path)}:{
+            case MATCH_${getMatchName(e.path)}:{
                 table = ${e.tableLink};
                 break;
             }
@@ -221,7 +240,7 @@ public class ${className} extends ContentProvider{
         switch(matcher.match(uri)){
             <#list entities as e>
             <#if !e.item && !e.onlyQuery>
-            case MATCH_${getMathcName(e.path)}:{
+            case MATCH_${getMatchName(e.path)}:{
                 table = ${e.tableLink};
                 break;
             }
@@ -253,7 +272,7 @@ public class ${className} extends ContentProvider{
         switch(matcher.match(uri)){
             <#list entities as e>
             <#if !e.onlyQuery>
-            case MATCH_${getMathcName(e.path)}:{
+            case MATCH_${getMatchName(e.path)}:{
                 table = ${e.tableLink};
                 <#if e.item>
                 processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
@@ -288,7 +307,7 @@ public class ${className} extends ContentProvider{
         switch(matcher.match(uri)){
             <#list entities as e>
             <#if !e.onlyQuery>
-            case MATCH_${getMathcName(e.path)}:{
+            case MATCH_${getMatchName(e.path)}:{
                 table = ${e.tableLink};
                 <#if e.item>
                 processedSelection = composeIdSelection(selection, uri.getLastPathSegment(), "${e.selectColumn}");
@@ -360,7 +379,7 @@ public class ${className} extends ContentProvider{
         switch(matcher.match(uri)){
             <#list entities as e>
             <#if (e.hasAltNotify)>
-            case MATCH_${getMathcName(e.path)}:{
+            case MATCH_${getMatchName(e.path)}:{
                 
                 <#list e.altNotify as alt>
                     <#if e.item && alt.itemizedAltNotify>

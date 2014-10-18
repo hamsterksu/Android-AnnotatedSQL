@@ -49,6 +49,7 @@ public class ProviderProcessor extends AbstractProcessor {
 
     private final static int MATCH_TYPE_ITEM = 0x0001;
     private final static int MATCH_TYPE_DIR = 0x0002;
+    private final static int MATCH_TYPE_CUSTOM = 0x0003;
     //private final static int MATCH_TYPE_MASK = 0x000f;
 
     private int elementCode = 0x1000;
@@ -205,10 +206,10 @@ public class ProviderProcessor extends AbstractProcessor {
             String pathValue = (String) ((VariableElement) e).getConstantValue();
             String path = parentName + "." + e.getSimpleName().toString();
             if (uri.type() == Type.DIR_AND_ITEM && !rawQuery) {
-                uris.add(createUriMeta(Type.DIR, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList, builder, rawQuery));
-                uris.add(createUriMeta(Type.ITEM, path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), null, builder, rawQuery));
+                uris.add(createUriMeta(Type.DIR, uri.customMimeType(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList, builder, rawQuery));
+                uris.add(createUriMeta(Type.ITEM, uri.customMimeType(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), null, builder, rawQuery));
             } else {
-                uris.add(createUriMeta(uri.type(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList, builder, rawQuery));
+                uris.add(createUriMeta(uri.type(), uri.customMimeType(), path, uri.column(), pathValue, from, uri.altNotify(), uri.onlyQuery(), triggersList, builder, rawQuery));
             }
         }
         return uris;
@@ -233,7 +234,7 @@ public class ProviderProcessor extends AbstractProcessor {
         triggers.add(new TriggerMeta(triggerMethod, trigger.type(), trigger.when() == When.BEFORE));
     }
 
-    private UriMeta createUriMeta(Type type, String path, String selectColumn, String pathValue, String from, String[] altNotify, boolean onlyQuery, List<TriggerMeta> triggers, Where builder, boolean rawQuery) {
+    private UriMeta createUriMeta(Type type, String customMimeType, String path, String selectColumn, String pathValue, String from, String[] altNotify, boolean onlyQuery, List<TriggerMeta> triggers, Where builder, boolean rawQuery) {
         if (type == Type.ITEM && !pathValue.endsWith("#")) {
             if (!pathValue.endsWith("/")) {
                 path += " + \"/#\"";
@@ -244,7 +245,7 @@ public class ProviderProcessor extends AbstractProcessor {
         int typeMask = type == Type.DIR ? MATCH_TYPE_DIR : MATCH_TYPE_ITEM;
         int code = elementCode | typeMask;
         elementCode += 0x0010;
-        return new UriMeta(path, code, type == Type.ITEM, selectColumn, from, altNotify, onlyQuery, triggers, rawQuery, builder);
+        return new UriMeta(path, code, type == Type.ITEM, customMimeType, selectColumn, from, altNotify, onlyQuery, triggers, rawQuery, builder);
     }
 
     private String findName(Element element) {

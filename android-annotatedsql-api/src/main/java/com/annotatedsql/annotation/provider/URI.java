@@ -14,5 +14,7 @@ public @interface URI {
 
     boolean onlyQuery() default false;
 
+    String customMimeType() default "";
+
     public static enum Type {DIR, ITEM, DIR_AND_ITEM}
 }
