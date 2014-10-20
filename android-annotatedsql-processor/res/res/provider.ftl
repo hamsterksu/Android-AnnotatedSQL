@@ -410,15 +410,6 @@ public class ${className} extends ContentProvider{
     }
 
     @Deprecated
-    public static Uri getContentUriGroupBy(String path, String groupBy){
-        return getUriBuilder().append(path).groupBy(groupBy).build();
-    }
-
-    public static Uri contentUriGroupBy(String path, String groupBy){
-        return getUriBuilder().append(path).groupBy(groupBy).build();
-    }
-
-    @Deprecated
     public static Uri getContentUri(String path, long id){
         return getUriBuilder().append(path).append(id).build();
     }
@@ -437,21 +428,43 @@ public class ${className} extends ContentProvider{
     }
 
     @Deprecated
-    public static Uri getContentWithLimitUri(String path, int limit){
-        return getUriBuilder().append(path).limit(limit).build();
-    }
-
-    public static Uri contentUriWithLimit(String path, int limit){
-        return getUriBuilder().append(path).limit(limit).build();
-    }
-
-    @Deprecated
     public static Uri getNoNotifyContentUri(String path){
         return getUriBuilder().append(path).noNotify().build();
     }
 
     public static Uri contentUriNoNotify(String path){
         return getUriBuilder().append(path).noNotify().build();
+    }
+
+    @Deprecated
+    public static Uri getNoNotifyContentUri(String path, long id){
+        return getUriBuilder().append(path).append(id).noNotify().build();
+    }
+
+    public static Uri contentUriNoNotify(String path, long id){
+        return getUriBuilder().append(path).append(id).noNotify().build();
+    }
+
+    public static Uri contentUriNoNotify(String path, String id){
+        return getUriBuilder().append(path).append(id).noNotify().build();
+    }
+
+    @Deprecated
+    public static Uri getContentUriGroupBy(String path, String groupBy){
+        return getUriBuilder().append(path).groupBy(groupBy).build();
+    }
+
+    public static Uri contentUriGroupBy(String path, String groupBy){
+        return getUriBuilder().append(path).groupBy(groupBy).build();
+    }
+
+    @Deprecated
+    public static Uri getContentWithLimitUri(String path, int limit){
+        return getUriBuilder().append(path).limit(limit).build();
+    }
+
+    public static Uri contentUriWithLimit(String path, int limit){
+        return getUriBuilder().append(path).limit(limit).build();
     }
 
     public static Uri contentUriInsertNoNotify(String path, int conflicResolution){
@@ -468,11 +481,6 @@ public class ${className} extends ContentProvider{
 
     public static Uri contentUriBulkInsert(String path, BulkInsertConflictMode conflict){
         return getUriBuilder().append(path).bulkInsertMode(conflict).build();
-    }
-
-    @Deprecated
-    public static Uri getNoNotifyContentUri(String path, long id){
-        return getUriBuilder().append(path).append(id).noNotify().build();
     }
 
     public static UriBuilder getUriBuilder(){
@@ -574,6 +582,50 @@ public class ${className} extends ContentProvider{
 
         public static String getGroupBy(Uri uri){
             return uri.getQueryParameter(QUERY_GROUP_BY);
+        }
+
+        public static Uri contentUri(Uri uri, long id){
+            return new UriBuilder(uri).append(id).build();
+        }
+
+        public static Uri contentUri(Uri uri, String id){
+            return new UriBuilder(uri).append(id).build();
+        }
+
+        public static Uri contentUriNoNotify(Uri uri){
+            return new UriBuilder(uri).noNotify().build();
+        }
+
+        public static Uri contentUriNoNotify(Uri uri, long id){
+            return new UriBuilder(uri).append(id).noNotify().build();
+        }
+
+        public static Uri contentUriNoNotify(Uri uri, String id){
+            return new UriBuilder(uri).append(id).noNotify().build();
+        }
+
+        public static Uri contentUriWithLimit(Uri uri, int limit){
+            return new UriBuilder(uri).limit(limit).build();
+        }
+
+        public static Uri contentUriGroupBy(Uri uri, String groupBy){
+            return new UriBuilder(uri).groupBy(groupBy).build();
+        }
+
+        public static Uri contentUriInsertNoNotify(Uri uri, int conflicResolution){
+            return new UriBuilder(uri).noNotify().insertConflictMode(conflicResolution).build();
+        }
+
+        public static Uri contentUriInsert(Uri uri, int conflicResolution){
+            return new UriBuilder(uri).insertConflictMode(conflicResolution).build();
+        }
+
+        public static Uri contentUriBulkInsertNoNotify(Uri uri, BulkInsertConflictMode conflict){
+            return new UriBuilder(uri).noNotify().bulkInsertMode(conflict).build();
+        }
+
+        public static Uri contentUriBulkInsert(Uri uri, BulkInsertConflictMode conflict){
+            return new UriBuilder(uri).bulkInsertMode(conflict).build();
         }
     }
     

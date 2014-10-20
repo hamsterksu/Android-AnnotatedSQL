@@ -11,6 +11,7 @@ import com.annotatedsql.annotation.sql.Table;
 import com.annotatedsql.ftl.IndexMeta;
 import com.annotatedsql.ftl.TableColumns;
 import com.annotatedsql.processor.ProcessorLogger;
+import com.annotatedsql.processor.logger.ILogger;
 import com.annotatedsql.processor.sql.ColumnProcessor.ColumnMeta;
 import com.annotatedsql.util.ClassUtil;
 import com.annotatedsql.util.Where;
@@ -31,11 +32,11 @@ public class TableParser {
 
     private final TypeElement c;
     private final ParserEnv parserEnv;
-    private final ProcessorLogger logger;
+    private final ILogger logger;
 
     private String tableName;
 
-    public TableParser(TypeElement c, ParserEnv parserEnv, ProcessorLogger logger) {
+    public TableParser(TypeElement c, ParserEnv parserEnv, ILogger logger) {
         this.logger = logger;
         this.c = c;
         this.parserEnv = parserEnv;

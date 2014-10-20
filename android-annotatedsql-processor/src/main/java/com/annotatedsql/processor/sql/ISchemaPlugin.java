@@ -5,7 +5,6 @@ import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.ProcessorLogger;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 /**
@@ -35,7 +34,7 @@ public interface ISchemaPlugin {
      * @param element
      * @param meta
      */
-    void processView(Element element, ViewMeta meta);
+    void processView(TypeElement element, ViewMeta meta);
 
     /**
      * execute after raw query parser
@@ -43,7 +42,7 @@ public interface ISchemaPlugin {
      * @param element
      * @param meta
      */
-    void processRawQuery(Element element, ViewMeta meta);
+    void processRawQuery(TypeElement element, ViewMeta meta);
 
     /**
      * execute in the end of generation, so you can create your files here
@@ -51,6 +50,6 @@ public interface ISchemaPlugin {
      * @param element
      * @param model
      */
-    void processSchema(Element element, SchemaMeta model);
+    void processSchema(TypeElement element, SchemaMeta model);
 
 }

@@ -11,6 +11,8 @@ import com.annotatedsql.ftl.SchemaMeta;
 import com.annotatedsql.ftl.TableMeta;
 import com.annotatedsql.ftl.ViewMeta;
 import com.annotatedsql.processor.ProcessorLogger;
+import com.annotatedsql.processor.logger.ILogger;
+import com.annotatedsql.processor.logger.TagLogger;
 import com.annotatedsql.util.TextUtils;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -39,18 +42,19 @@ import freemarker.template.TemplateException;
 
 @SupportedAnnotationTypes({"com.annotatedsql.annotation.sql.Schema"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedOptions({ProcessorLogger.ARG_LOG_LEVEL, SQLProcessor.ARG_PLUGINS})
 public class SQLProcessor extends AbstractProcessor {
 
     public static final String ARG_PLUGINS = "plugins";
 
-    private ProcessorLogger logger;
+    private TagLogger logger;
     private Configuration cfg = new Configuration();
     private List<ISchemaPlugin> plugins = new ArrayList<ISchemaPlugin>();
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        logger = new ProcessorLogger(processingEnv.getMessager());
+        logger = new TagLogger("SQLProcessor", new ProcessorLogger(processingEnv.getMessager(), processingEnv.getOptions()));
         logger.i("init");
 
         cfg.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/res"));
@@ -83,7 +87,7 @@ public class SQLProcessor extends AbstractProcessor {
                 logger.i("plugin " + s + " .newInstance");
                 ISchemaPlugin plugin = (ISchemaPlugin) clazz.newInstance();
                 logger.i("plugin " + s + " .newInstance end");
-                plugin.init(processingEnv, logger);
+                plugin.init(processingEnv, logger.getLogger());
                 logger.i("plugin " + s + " .init end");
                 this.plugins.add(plugin);
                 logger.i("plugin " + s + " added");
@@ -102,9 +106,11 @@ public class SQLProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        logger.i("SQLProcessor started");
-        if (annotations == null || annotations.size() == 0)
+        logger.i("started");
+        if (annotations == null || annotations.size() == 0) {
+            logger.i("no annotations");
             return false;
+        }
         try {
             return processTable(roundEnv);
         } catch (AnnotationParsingException e) {
@@ -114,10 +120,10 @@ public class SQLProcessor extends AbstractProcessor {
     }
 
     private boolean processTable(RoundEnvironment roundEnv) {
-        logger.i("SQLProcessor processTable");
+        logger.i("processTable");
 
         SchemaMeta schema;
-        Element schemaElement;
+        TypeElement schemaElement;
         Set<? extends Element> schemaElements = roundEnv.getElementsAnnotatedWith(Schema.class);
         if (schemaElements != null && schemaElements.size() != 0) {
             if (schemaElements.size() != 1) {
@@ -126,7 +132,12 @@ public class SQLProcessor extends AbstractProcessor {
                 }
                 return false;
             } else {
-                schemaElement = schemaElements.iterator().next();
+                Element se = schemaElements.iterator().next();
+                if (!(se instanceof TypeElement)) {
+                    logger.e("Schema should be interface or class", se);
+                    return false;
+                }
+                schemaElement = (TypeElement) se;
                 Schema schemaAnnotation = schemaElement.getAnnotation(Schema.class);
                 if (TextUtils.isEmpty(schemaAnnotation.className())) {
                     logger.e("Schema name can't be empty", schemaElement);
@@ -138,7 +149,7 @@ public class SQLProcessor extends AbstractProcessor {
 
                 PackageElement pkg = (PackageElement) schemaElement.getEnclosingElement();
                 String pkgName = pkg.getQualifiedName().toString();
-                logger.i("SQLProcessor pkgName found: " + pkgName);
+                logger.i("pkgName found: " + pkgName);
                 schema.setPkgName(pkgName);
 
             }
@@ -151,7 +162,7 @@ public class SQLProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
             if (!(element instanceof TypeElement))
                 continue;
-            logger.i("SQLProcessor table found: " + element.getSimpleName());
+            logger.i("table found: " + element.getSimpleName());
             TypeElement typeElement = (TypeElement) element;
 
             TableResult tableInfo = new TableParser(typeElement, parserEnv, logger).parse();
@@ -168,17 +179,23 @@ public class SQLProcessor extends AbstractProcessor {
         }
 
         for (Element element : roundEnv.getElementsAnnotatedWith(SimpleView.class)) {
-            logger.i("SQLProcessor simple view found: " + element.getSimpleName());
-            ViewMeta viewMeta = new SimpleViewParser(element, parserEnv).parse();
+            if (!(element instanceof TypeElement))
+                continue;
+            TypeElement typeElement = (TypeElement) element;
+            logger.i("simple view found: " + element.getSimpleName());
+            ViewMeta viewMeta = new SimpleViewParser(typeElement, parserEnv).parse();
             schema.addView(viewMeta);
-            processViewInPlugins(element, viewMeta);
+            processViewInPlugins(typeElement, viewMeta);
         }
 
         for (Element element : roundEnv.getElementsAnnotatedWith(RawQuery.class)) {
-            logger.i("SQLProcessor raw query found: " + element.getSimpleName());
-            ViewMeta rawMeta = new RawQueryParser(element, parserEnv).parse();
+            if (!(element instanceof TypeElement))
+                continue;
+            TypeElement typeElement = (TypeElement) element;
+            logger.i("raw query found: " + element.getSimpleName());
+            ViewMeta rawMeta = new RawQueryParser(typeElement, parserEnv).parse();
             schema.addQuery(rawMeta);
-            processRawQueryInPlugins(element, rawMeta);
+            processRawQueryInPlugins(typeElement, rawMeta);
         }
         if (schema.isEmpty()) {
             return false;
@@ -215,7 +232,7 @@ public class SQLProcessor extends AbstractProcessor {
     }
 
 
-    private void processSchemaInPlugins(Element element, SchemaMeta model) {
+    private void processSchemaInPlugins(TypeElement element, SchemaMeta model) {
         logger.i("processSchemaInPlugins");
         for (ISchemaPlugin plugin : plugins) {
             plugin.processSchema(element, model);
@@ -231,7 +248,7 @@ public class SQLProcessor extends AbstractProcessor {
         logger.i("processTableInPlugins end");
     }
 
-    private void processViewInPlugins(Element element, ViewMeta tableInfo) {
+    private void processViewInPlugins(TypeElement element, ViewMeta tableInfo) {
         logger.i("processViewInPlugins");
         for (ISchemaPlugin plugin : plugins) {
             plugin.processView(element, tableInfo);
@@ -239,7 +256,7 @@ public class SQLProcessor extends AbstractProcessor {
         logger.i("processViewInPlugins end");
     }
 
-    private void processRawQueryInPlugins(Element element, ViewMeta tableInfo) {
+    private void processRawQueryInPlugins(TypeElement element, ViewMeta tableInfo) {
         for (ISchemaPlugin plugin : plugins) {
             plugin.processRawQuery(element, tableInfo);
         }

@@ -16,6 +16,7 @@ import com.annotatedsql.ftl.ProviderMeta;
 import com.annotatedsql.ftl.TriggerMeta;
 import com.annotatedsql.ftl.UriMeta;
 import com.annotatedsql.processor.ProcessorLogger;
+import com.annotatedsql.processor.logger.TagLogger;
 import com.annotatedsql.processor.sql.TableParser;
 import com.annotatedsql.processor.sql.TableResult;
 import com.annotatedsql.util.TextUtils;
@@ -28,8 +29,10 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -45,6 +48,7 @@ import freemarker.template.TemplateException;
 
 @SupportedAnnotationTypes({"com.annotatedsql.annotation.provider.Provider", "com.annotatedsql.annotation.provider.Providers"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedOptions({ProcessorLogger.ARG_LOG_LEVEL})
 public class ProviderProcessor extends AbstractProcessor {
 
     private final static int MATCH_TYPE_ITEM = 0x0001;
@@ -54,15 +58,22 @@ public class ProviderProcessor extends AbstractProcessor {
 
     private int elementCode = 0x1000;
 
-    private ProcessorLogger logger;
+    private TagLogger logger;
     private Configuration cfg = new Configuration();
 
     @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        logger = new TagLogger("ProviderProcessor", new ProcessorLogger(processingEnv.getMessager(), processingEnv.getOptions()));
+        logger.i("init");
+
+        cfg.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/res"));
+    }
+
+    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        logger = new ProcessorLogger(processingEnv.getMessager());
         if (annotations == null || annotations.size() == 0)
             return false;
-        cfg.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/res"));
         try {
             return processProviders(roundEnv);
         } catch (AnnotationParsingException e) {
@@ -243,6 +254,9 @@ public class ProviderProcessor extends AbstractProcessor {
             }
         }
         int typeMask = type == Type.DIR ? MATCH_TYPE_DIR : MATCH_TYPE_ITEM;
+        if(!TextUtils.isEmpty(customMimeType)){
+            typeMask = MATCH_TYPE_CUSTOM;
+        }
         int code = elementCode | typeMask;
         elementCode += 0x0010;
         return new UriMeta(path, code, type == Type.ITEM, customMimeType, selectColumn, from, altNotify, onlyQuery, triggers, rawQuery, builder);
