@@ -6,8 +6,8 @@ Android library for auto generating SQL schema and Content Provider by annotatio
 #####How to add to porject
 Now available in maven central repo:
 
-	com.github.hamsterksu:android-annotatedsql-api:1.10.0
-	com.github.hamsterksu:android-annotatedsql-processor:1.10.0
+	com.github.hamsterksu:android-annotatedsql-api:1.10.+
+	com.github.hamsterksu:android-annotatedsql-processor:1.10.+
 
 Very easy way to add annotation processors to your andorid project - just use [aptlibs][3] 
 
@@ -26,7 +26,7 @@ Very easy way to add annotation processors to your andorid project - just use [a
 		apt
 	}
 	
-	ext.asVersion = '1.10.0'
+	ext.asVersion = '1.10.+'
 
 	dependencies {
 		compile "com.github.hamsterksu:android-annotatedsql-api:${asVersion}"
@@ -40,6 +40,11 @@ Very easy way to add annotation processors to your andorid project - just use [a
 
 
 #####Changelog
+######version 1.10.2
+* add TagLogger.java
+* add methods to UriBuilder in Provider class
+* improve plugin
+
 ######version 1.10.0
 * support plugins
 * custom mime type for @Uri
