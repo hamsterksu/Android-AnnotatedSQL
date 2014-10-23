@@ -3,6 +3,9 @@ Android-AnnotatedSQL
 
 Android library for auto generating SQL schema and Content Provider by annotations. You will get a full-featured content provider in 5 minutes :)
 
+#####Wiki:
+All information was moved to the [Wiki](Home)
+
 #####Maven repo:
 
 	com.github.hamsterksu:android-annotatedsql-api:1.10.+
@@ -17,7 +20,7 @@ Current version is 1.10.2. You can find changlog [here](CHANGELOG.md)
 
 ***
 #####How to start?
-All necessary information in [wiki](Home).
+All necessary information in [Wiki](Home).
 
 There are: 
 * How to add tot the project
