@@ -57,6 +57,9 @@ Very easy way to add annotation processors to your andorid project - just use [a
 * add UriBuilder to provider
 * rename methods, old methods were marked as @Deprecated
 
+#####Available plugins
+* Projections - [annotatedsql-projection-plugin][4]
+
 --------
 The lib suppport common annotations to build tables, viewes, indexes, provider and provider query 
 
@@ -200,3 +203,4 @@ Inherid provider:
   [1]: http://dl.dropbox.com/u/8604560/plugins/annotatedsql
   [2]: https://github.com/hamsterksu/Android-AnnotatedSQL
   [3]: https://github.com/hamsterksu/android-aptlibs-gradle-plugin
+  [4]: https://github.com/hamsterksu/annotatedsql-projection-plugin
