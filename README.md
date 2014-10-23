@@ -15,8 +15,10 @@ Current version is 1.10.2. You can find changlog [here](CHANGELOG.md)
 #####Available plugins
 * Projections - [annotatedsql-projection-plugin][1]
 
+***
 #####How to start?
 All necessary information in [wiki](Home).
+
 There are: 
 * How to add tot the project
 * Define SQL Schema
