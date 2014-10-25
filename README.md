@@ -13,7 +13,7 @@ All information was moved to the [Wiki](Home)
 
 
 #####Changelog
-Current version is 1.10.2. You can find changlog [here](CHANGELOG.md)
+Current version is 1.10.3. You can find changlog [here](CHANGELOG.md)
 
 #####Available plugins
 * Projections - [annotatedsql-projection-plugin][1]
