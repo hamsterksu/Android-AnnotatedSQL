@@ -50,6 +50,11 @@ public class ColumnProcessor {
             sql.append(" DEFAULT (").append(defVal).append(")");
         }
 
+        String extra = column.extra();
+        if (!TextUtils.isEmpty(extra)) {
+            sql.append(" ").append(extra);
+        }
+
         return new ColumnMeta(columnName, isPrimary, sql.toString(), column.type(), isNotNull || isAutoIncrement || isPrimary);
     }
 

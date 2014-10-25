@@ -12,6 +12,8 @@ public @interface Column {
 
     String defVal() default EMPTY_DEF_VAL;
 
+    String extra() default "";
+
     public static enum Type {
         INTEGER, REAL, TEXT, BLOB
     }

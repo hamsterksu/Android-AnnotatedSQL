@@ -2,7 +2,7 @@ subprojects {
 
 	sourceCompatibility = 1.7
 	group = 'com.github.hamsterksu'
-	version = '1.10.2'
+	version = '1.10.3'
 
     apply plugin: 'java'
 	apply plugin: 'maven'
