@@ -1,4 +1,7 @@
 #####Changelog
+######version 1.10.3
+* add "extra" attribute to @Column 
+
 ######version 1.10.2
 * add TagLogger.java
 * add methods to UriBuilder in Provider class
