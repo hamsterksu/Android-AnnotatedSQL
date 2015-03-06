@@ -17,6 +17,7 @@ Current version is 1.10.3. You can find changlog [here](CHANGELOG.md)
 
 #####Available plugins
 * Projections - [annotatedsql-projection-plugin][1]
+* Android-AnnotatedSQL-WrapperPlugin - [Android-AnnotatedSQL-WrapperPlugin][4]
 
 ***
 #####How to start?
@@ -34,3 +35,4 @@ There are:
   [1]: https://github.com/hamsterksu/annotatedsql-projection-plugin
   [2]: https://github.com/hamsterksu/android-aptlibs-gradle-plugin
   [3]: https://github.com/hamsterksu/annotatedsql_demo/tree/AS_support_plugins
+  [4]: https://github.com/julienbanse/Android-AnnotatedSQL-WrapperPlugin
