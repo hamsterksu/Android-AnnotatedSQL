@@ -7,10 +7,10 @@ Android library for auto generating SQL schema and Content Provider by annotatio
 All information was moved to the [Wiki][5]
 
 #####Maven repo:
-
-	com.github.hamsterksu:android-annotatedsql-api:1.10.+
-	com.github.hamsterksu:android-annotatedsql-processor:1.10.+
-
+```groovy
+com.github.hamsterksu:android-annotatedsql-api:1.10.+
+com.github.hamsterksu:android-annotatedsql-processor:1.10.+
+```
 
 #####Changelog
 Current version is 1.10.3. You can find changlog [here](CHANGELOG.md)
