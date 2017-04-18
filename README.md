@@ -3,24 +3,24 @@ Android-AnnotatedSQL
 
 Android library for auto generating SQL schema and Content Provider by annotations. You will get a full-featured content provider in 5 minutes :)
 
-#####Wiki:
+##### Wiki:
 All information was moved to the [Wiki][5]
 
-#####Maven repo:
+##### Maven repo:
 ```groovy
 com.github.hamsterksu:android-annotatedsql-api:1.10.+
 com.github.hamsterksu:android-annotatedsql-processor:1.10.+
 ```
 
-#####Changelog
+##### Changelog
 Current version is 1.10.3. You can find changlog [here](CHANGELOG.md)
 
-#####Available plugins
+##### Available plugins
 * Projections - [annotatedsql-projection-plugin][1]
 * Android-AnnotatedSQL-WrapperPlugin - [Android-AnnotatedSQL-WrapperPlugin][4]
 
 ***
-#####How to start?
+##### How to start?
 All necessary information in [Wiki][5].
 
 There are: 
@@ -28,7 +28,7 @@ There are:
 * Define SQL Schema
 * Define Content Provider
 
-#####Tools and links
+##### Tools and links
 * gradle plugin to connect apt - [android-aptlibs-gradle-plugin][2]
 * demo application source - [annotatedsql_demo][3]
 
