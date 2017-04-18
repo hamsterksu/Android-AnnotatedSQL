@@ -1,18 +1,18 @@
-#####Changelog
-######version 1.10.3
+##### Changelog
+###### version 1.10.3
 * add "extra" attribute to @Column 
 
-######version 1.10.2
+###### version 1.10.2
 * add TagLogger.java
 * add methods to UriBuilder in Provider class
 * improve plugin
 
-######version 1.10.0
+###### version 1.10.0
 * support plugins
 * custom mime type for @Uri
 * reformat code: use whitespaces instead tab
 
-######version 1.9.0
+###### version 1.9.0
 * bulkinsert: support 2 modes: replace and insert
 * insert: support all conflict resolution modes
 * add 2 new arguments to @Provider - default mode for bulkinsert and insert
