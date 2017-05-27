@@ -223,10 +223,8 @@ public class ${className} extends ContentProvider{
         } finally {
             sql.endTransaction();
         }
-        
-        if (!UriBuilder.isIgnoreNotify(uri)) {
-            notifyUri(contentResolver, uri);
-        }
+        notifyUri(contentResolver, uri);
+
         return count;
     }
 
@@ -257,9 +255,8 @@ public class ${className} extends ContentProvider{
         <#list entities as e>
             <@addInsertAfterTrigger uri=e />
         </#list>
-        if(!UriBuilder.isIgnoreNotify(uri)){
-            notifyUri(contentResolver, uri);
-        }
+        notifyUri(contentResolver, uri);
+
         return Uri.withAppendedPath(uri, String.valueOf(id));
     }
 
@@ -291,9 +288,7 @@ public class ${className} extends ContentProvider{
         <#list entities as e>
             <@addUpdateAfterTrigger uri=e />
         </#list>
-        if(!UriBuilder.isIgnoreNotify(uri)){
-            notifyUri(contentResolver, uri);
-        }
+        notifyUri(contentResolver, uri);
         
         return count;
     }
@@ -326,9 +321,8 @@ public class ${className} extends ContentProvider{
         <#list entities as e>
             <@addDeleteAfterTrigger uri=e />
         </#list>
-        if(!UriBuilder.isIgnoreNotify(uri)){
-            notifyUri(contentResolver, uri);
-        }
+        notifyUri(contentResolver, uri);
+
         return count;
     }
     <#list entities as e>
@@ -374,25 +368,8 @@ public class ${className} extends ContentProvider{
         </#if>
     </#list>
     
-    public static void notifyUri(ContentResolver cr, Uri uri){
-        cr.notifyChange(uri, null);
-        switch(matcher.match(uri)){
-            <#list entities as e>
-            <#if (e.hasAltNotify)>
-            case MATCH_${getMatchName(e.path)}:{
-                
-                <#list e.altNotify as alt>
-                    <#if e.item && alt.itemizedAltNotify>
-                cr.notifyChange(getContentUri("${alt.value}", uri.getLastPathSegment()), null);
-                    <#else>
-                cr.notifyChange(getContentUri("${alt.value}"), null);
-                    </#if>
-                </#list>
-                break;
-            }
-            </#if>
-            </#list> 
-        }
+    protected void notifyUri(ContentResolver cr, Uri uri){
+        UriBuilder.notifyChange(cr, uri);
     }
 
     @Deprecated
@@ -490,6 +467,7 @@ public class ${className} extends ContentProvider{
     public static class UriBuilder{
 
         public static final String FRAGMENT_NO_NOTIFY = "no-notify";
+        public static final String FRAGMENT_NO_SYNC = "no-sync";
         public static final String QUERY_LIMIT = "limit";
         public static final String QUERY_GROUP_BY = "groupBy";
         public static final String QUERY_BULK_INSERT_CONFLICT_MODE = "biMode";
@@ -523,6 +501,11 @@ public class ${className} extends ContentProvider{
             return this;
         }
 
+        public UriBuilder noSyncToNetwork(){
+            uri.fragment(FRAGMENT_NO_SYNC);
+            return this;
+        }
+
         public UriBuilder limit(int limit){
             uri.appendQueryParameter(QUERY_LIMIT, String.valueOf(limit));
             return this;
@@ -553,6 +536,10 @@ public class ${className} extends ContentProvider{
 
         public static boolean isIgnoreNotify(Uri uri) {
             return FRAGMENT_NO_NOTIFY.equals(uri.getFragment());
+        }
+
+        public static boolean isSyncToNetwork(Uri uri) {
+            return FRAGMENT_NO_NOTIFY.equals(uri.getFragment()) || !FRAGMENT_NO_SYNC.equals(uri.getFragment());
         }
 
         public static BulkInsertConflictMode getBulkInsertConflictMode(Uri uri, BulkInsertConflictMode defValue) {
@@ -626,6 +613,32 @@ public class ${className} extends ContentProvider{
 
         public static Uri contentUriBulkInsert(Uri uri, BulkInsertConflictMode conflict){
             return new UriBuilder(uri).bulkInsertMode(conflict).build();
+        }
+
+        public static void notifyChange(ContentResolver cr, Uri uri) {
+            if(UriBuilder.isIgnoreNotify(uri))
+                return;
+
+            boolean syncToNetwork = isSyncToNetwork(uri);
+
+            cr.notifyChange(uri, null, syncToNetwork);
+
+            switch(matcher.match(uri)){
+                <#list entities as e>
+                <#if (e.hasAltNotify)>
+                    case MATCH_${getMatchName(e.path)}:{
+                        <#list e.altNotify as alt>
+                            <#if e.item && alt.itemizedAltNotify>
+                            cr.notifyChange(getContentUri("${alt.value}", uri.getLastPathSegment()), null, syncToNetwork);
+                            <#else>
+                            cr.notifyChange(getContentUri("${alt.value}"), null, syncToNetwork);
+                            </#if>
+                        </#list>
+                        break;
+                    }
+                </#if>
+                </#list>
+            }
         }
     }
     
